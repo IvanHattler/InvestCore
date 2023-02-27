@@ -37,7 +37,7 @@ internal class Program
 
         var buyModelService = _container.Resolve<IBuyModelService>();
 
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 1; i++)
         {
             var (message, model) = GetBuyMessage(buyModelService, _stockPortfolio);
 
@@ -49,6 +49,8 @@ internal class Program
 
             PrintOverall(_stockPortfolio);
         }
+
+        Console.ReadLine();
     }
 
     private static void PrintOverall(StockPortfolioCalculationModel stockPortfolio)
@@ -81,7 +83,7 @@ internal class Program
 
     private static (string, BuyModel) GetBuyMessage(IBuyModelService buyModelService, StockPortfolioCalculationModel model)
     {
-        var bestModel = buyModelService.CalculateBestBuyModelOptimized(model.Share, model.GosBond, model.CorpBond, model.Replenishment);
+        var bestModel = buyModelService.CalculateBestBuyModel(model.Share, model.GosBond, model.CorpBond, model.Replenishment);
 
         if (bestModel == null)
             return ("Не удалось вычислить", bestModel);

@@ -1,5 +1,6 @@
 ﻿using InvestCore.PercentCalculateConsole.Domain;
 using InvestCore.PercentCalculateConsole.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace InvestCore.PercentCalculateConsole.Services.Implementation
 {
@@ -7,13 +8,15 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
     {
         protected const decimal MinPercentForBuy = 0.9m;
         private ISelectBestBuyModelStrategy _selectBestBuyModelStrategy;
+        private ILogger _logger;
 
-        public BuyModelService(ISelectBestBuyModelStrategy selectBestBuyModelStrategy)
+        public BuyModelService(ISelectBestBuyModelStrategy selectBestBuyModelStrategy, ILogger logger)
         {
             _selectBestBuyModelStrategy = selectBestBuyModelStrategy;
+            _logger = logger;
         }
 
-        public BuyModel? CalculateBestBuyModelOptimized(
+        public BuyModel? CalculateBestBuyModel(
             InstrumentCalculationModel shareDto,
             InstrumentCalculationModel gosBondDto,
             InstrumentCalculationModel corpBondDto,
@@ -51,7 +54,7 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
                             var newOverallCorpBonds = corpBondDto.OverallSum + corpBondsPrice;
                             var newOverall = newOverallShares + newOverallGosBonds + newOverallCorpBonds;
 
-                            buyModels.Add(GetBuyModelOptimized(shareDto,
+                            buyModels.Add(GetBuyModel(shareDto,
                                 gosBondDto,
                                 corpBondDto,
                                 replenishmentDto,
@@ -68,6 +71,7 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
                 }
             }
 
+            _logger.LogInformation("Выбрано вариантов моделей: {count}", buyModels.Count);
             return _selectBestBuyModelStrategy.SelectBestModel(buyModels);
         }
 
@@ -78,7 +82,7 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
             return step > 0 ? step : 1;
         }
 
-        private static BuyModel GetBuyModelOptimized(InstrumentCalculationModel shareDto, InstrumentCalculationModel gosBondDto, InstrumentCalculationModel corpBondDto, ReplenishmentModel replenishmentDto, int countShares, int countGosBonds, int countCorpBonds, decimal price, decimal newOverallShares, decimal newOverallGosBonds, decimal newOverallCorpBonds, decimal newOverall)
+        private static BuyModel GetBuyModel(InstrumentCalculationModel shareDto, InstrumentCalculationModel gosBondDto, InstrumentCalculationModel corpBondDto, ReplenishmentModel replenishmentDto, int countShares, int countGosBonds, int countCorpBonds, decimal price, decimal newOverallShares, decimal newOverallGosBonds, decimal newOverallCorpBonds, decimal newOverall)
         {
             return new BuyModel()
             {

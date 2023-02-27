@@ -1,16 +1,20 @@
-﻿using InvestCore.Domain.Services.Interfaces;
+﻿using System.Text.Json;
+using InvestCore.Domain.Services.Interfaces;
 using InvestCore.PercentCalculateConsole.Domain;
 using InvestCore.PercentCalculateConsole.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace InvestCore.PercentCalculateConsole.Services.Implementation
 {
     public class StockPortfolioService : IStockPortfolioService
     {
         private IShareService _shareService;
+        private ILogger _logger;
 
-        public StockPortfolioService(IShareService shareService)
+        public StockPortfolioService(IShareService shareService, ILogger logger)
         {
-            _shareService = shareService ?? throw new ArgumentNullException(nameof(shareService));
+            _shareService = shareService;
+            _logger = logger;
         }
 
         public void UpdateOverallSum(StockPortfolioCalculationModel stockPortfolio, BuyModel model)
@@ -44,24 +48,22 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
             //    .Sum(x => stockProfilePrices[x.Ticker]);
 
 
-            //var overallShares = 209748.5m;
-            //var overallGosBonds = 18299.3m;
-            //var overallCorpBonds = 34043.7m;
-            var overallShares = 200200.5m;
-            var overallGosBonds = 12159.00m;
-            var overallCorpBonds = 30812.70m;
-            decimal sharePrice = 11.94m;//tickersForBuyPrices[model.Share.Ticker];
-            decimal gosBondPrice = 12.16m;//tickersForBuyPrices[model.GosBond.Ticker];
-            decimal corpBondPrice = 12.6m;//1079.8m;//tickersForBuyPrices[model.CorpBond.Ticker];
+            var overallShares = 209748.5m;
+            var overallGosBonds = 18299.3m;
+            var overallCorpBonds = 34043.7m;
 
-            model.Share.Price = sharePrice;
+            model.Share.Price = 11.94m;//tickersForBuyPrices[model.Share.Ticker];
             model.Share.OverallSum = overallShares;
 
-            model.GosBond.Price = gosBondPrice;
+            model.GosBond.Price = 12.16m;//tickersForBuyPrices[model.GosBond.Ticker];
             model.GosBond.OverallSum = overallGosBonds;
 
-            model.CorpBond.Price = corpBondPrice;
+            model.CorpBond.Price = 12.6m;//1079.8m;//tickersForBuyPrices[model.CorpBond.Ticker];
             model.CorpBond.OverallSum = overallCorpBonds;
+
+            _logger.LogInformation(JsonSerializer.Serialize(model.Share));
+            _logger.LogInformation(JsonSerializer.Serialize(model.GosBond));
+            _logger.LogInformation(JsonSerializer.Serialize(model.CorpBond));
         }
     }
 }
