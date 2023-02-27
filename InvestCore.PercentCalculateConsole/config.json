@@ -6,6 +6,7 @@
       "ReplenishmentAmount": 25000,
       "CurrentSum": 7.6
     },
+
     "Share": {
       "ClassType": 0,
       "TargetPercent": 0.8,
@@ -24,6 +25,7 @@
       "Ticker": "SBRB",
       "TickerType": 2
     },
+
     "TickerInfos": [
       {
         "Ticker": "SBER",
@@ -46,7 +48,8 @@
       {
         "Ticker": "MGNT",
         "ClassType": 0,
-        "Count": 4
+        "Count": 4,
+        "TickerType": 0
       },
       {
         "Ticker": "OGKB",

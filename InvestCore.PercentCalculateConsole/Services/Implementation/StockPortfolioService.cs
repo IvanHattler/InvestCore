@@ -8,8 +8,8 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
 {
     public class StockPortfolioService : IStockPortfolioService
     {
-        private IShareService _shareService;
-        private ILogger _logger;
+        private readonly IShareService _shareService;
+        private readonly ILogger _logger;
 
         public StockPortfolioService(IShareService shareService, ILogger logger)
         {
@@ -46,7 +46,6 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
             //var overallCorpBonds = model.TickerInfos
             //    .Where(x => x.ClassType == InstrumentClassType.CorpBond)
             //    .Sum(x => stockProfilePrices[x.Ticker]);
-
 
             var overallShares = 209748.5m;
             var overallGosBonds = 18299.3m;

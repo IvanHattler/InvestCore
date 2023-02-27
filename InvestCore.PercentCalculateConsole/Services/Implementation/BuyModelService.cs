@@ -71,7 +71,6 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
                 }
             }
 
-            _logger.LogInformation("Выбрано вариантов моделей: {count}", buyModels.Count);
             return _selectBestBuyModelStrategy.SelectBestModel(buyModels);
         }
 

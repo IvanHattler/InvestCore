@@ -14,54 +14,25 @@ internal class Program
     private static readonly IContainer _container;
     private static readonly IConfigurationRoot _configuration;
     private static readonly StockPortfolioCalculationModel _stockPortfolio;
+    private static readonly IMessageService _messageService;
 
     static Program()
     {
         _configuration = BuildConfig();
 
-        var telegramToken = _configuration.GetRequiredSection("TinkoffToken").Get<string>();
+        var telegramToken = _configuration.GetRequiredSection("TinkoffToken").Get<string>()
+            ?? string.Empty;
         _stockPortfolio = _configuration.GetRequiredSection("StockPortfolioCalculationModel").Get<StockPortfolioCalculationModel>()
             ?? new StockPortfolioCalculationModel();
 
         _container = BuildContainer(telegramToken);
+        _messageService = _container.Resolve<IMessageService>();
     }
 
     private static void Main(string[] args)
     {
-        var stockPortfolioService = _container.Resolve<IStockPortfolioService>();
-
-        stockPortfolioService.LoadPricesToModel(_stockPortfolio);
-
-        Console.WriteLine("--------------------------Месяц №0--------------------------");
-        PrintOverall(_stockPortfolio);
-
-        var buyModelService = _container.Resolve<IBuyModelService>();
-
-        for (int i = 0; i < 1; i++)
-        {
-            var (message, model) = GetBuyMessage(buyModelService, _stockPortfolio);
-
-            Console.WriteLine($"--------------------------Месяц №{i + 1}--------------------------");
-            Console.WriteLine();
-            Console.WriteLine(message);
-
-            stockPortfolioService.UpdateOverallSum(_stockPortfolio, model);
-
-            PrintOverall(_stockPortfolio);
-        }
-
+        Console.WriteLine(_messageService.GetResultMessage(_stockPortfolio));
         Console.ReadLine();
-    }
-
-    private static void PrintOverall(StockPortfolioCalculationModel stockPortfolio)
-    {
-        var overall = stockPortfolio.Share.OverallSum
-            + stockPortfolio.GosBond.OverallSum
-            + stockPortfolio.CorpBond.OverallSum;
-
-        PrintOverall(stockPortfolio.Share.OverallSum,
-            stockPortfolio.GosBond.OverallSum,
-            stockPortfolio.CorpBond.OverallSum, overall);
     }
 
     private static IConfigurationRoot BuildConfig()
@@ -71,24 +42,6 @@ internal class Program
             .AddUserSecrets(Assembly.GetExecutingAssembly())
             .AddJsonFile("config.json", false)
             .Build();
-    }
-
-    private static void PrintOverall(decimal newOverallShares, decimal newOverallGosBonds, decimal newOverallCorpBonds, decimal newOverall)
-    {
-        Console.WriteLine();
-        Console.WriteLine($"{newOverallShares:F}\t{newOverallGosBonds:F}\t{newOverallCorpBonds:F}");
-        Console.WriteLine($"{newOverallShares / newOverall:P4}\t{newOverallGosBonds / newOverall:P4}\t{newOverallCorpBonds / newOverall:P4}");
-        Console.WriteLine();
-    }
-
-    private static (string, BuyModel) GetBuyMessage(IBuyModelService buyModelService, StockPortfolioCalculationModel model)
-    {
-        var bestModel = buyModelService.CalculateBestBuyModel(model.Share, model.GosBond, model.CorpBond, model.Replenishment);
-
-        if (bestModel == null)
-            return ("Не удалось вычислить", bestModel);
-
-        return (bestModel.GetBuyMessage(), bestModel);
     }
 
     private static IContainer BuildContainer(string tinkoffToken)
@@ -114,6 +67,7 @@ internal class Program
         builder.RegisterType<TinkoffApiService>().SingleInstance().As<IShareService>();
         builder.RegisterType<StockPortfolioService>().SingleInstance().As<IStockPortfolioService>();
         builder.Register(c => InvestApiClientFactory.Create(tinkoffToken)).SingleInstance();
+        builder.RegisterType<MessageService>().SingleInstance().As<IMessageService>();
 
         #endregion Services
 
