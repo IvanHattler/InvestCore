@@ -24,45 +24,28 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
             stockPortfolio.CorpBond.OverallSum += model.CorpBondCounts * stockPortfolio.CorpBond.Price;
         }
 
-        public void LoadPricesToModel(StockPortfolioCalculationModel model)
+        public Dictionary<string, decimal> GetStockProfilePrices(StockPortfolioCalculationModel stockPortfolio)
         {
-            //var tickersForBuyPrices = _shareService
-            //    .GetPricesAsync(model.GetTickers())
-            //    .Result;
-
-            //var stockProfilePrices = _shareService
-            //    .GetPricesAsync(
-            //        model.TickerInfos.Select(x => (x.Ticker, x.TickerType)))
-            //    .Result;
-
-            //var overallShares = model.TickerInfos
-            //    .Where(x => x.ClassType == InstrumentClassType.Share)
-            //    .Sum(x => stockProfilePrices[x.Ticker]);
-
-            //var overallGosBonds = model.TickerInfos
-            //    .Where(x => x.ClassType == InstrumentClassType.GosBond)
-            //    .Sum(x => stockProfilePrices[x.Ticker]);
-
-            //var overallCorpBonds = model.TickerInfos
-            //    .Where(x => x.ClassType == InstrumentClassType.CorpBond)
-            //    .Sum(x => stockProfilePrices[x.Ticker]);
-
-            var overallShares = 209748.5m;
-            var overallGosBonds = 18299.3m;
-            var overallCorpBonds = 34043.7m;
-
-            model.Share.Price = 11.94m;//tickersForBuyPrices[model.Share.Ticker];
-            model.Share.OverallSum = overallShares;
-
-            model.GosBond.Price = 12.16m;//tickersForBuyPrices[model.GosBond.Ticker];
-            model.GosBond.OverallSum = overallGosBonds;
-
-            model.CorpBond.Price = 12.6m;//1079.8m;//tickersForBuyPrices[model.CorpBond.Ticker];
-            model.CorpBond.OverallSum = overallCorpBonds;
-
-            _logger.LogInformation(JsonSerializer.Serialize(model.Share));
-            _logger.LogInformation(JsonSerializer.Serialize(model.GosBond));
-            _logger.LogInformation(JsonSerializer.Serialize(model.CorpBond));
+            return _shareService
+                .GetPricesAsync(stockPortfolio
+                    .GetTickersForBuy()
+                    .Union(stockPortfolio.TickerInfos
+                        .Select(x => (x.Ticker, x.TickerType))))
+                .Result;
         }
+
+        public void LoadPricesToModel(StockPortfolioCalculationModel model, IDictionary<string, decimal> prices)
+        {
+            (model.Share.Price, model.Share.OverallSum) = GetPriceAndOverall(model.Share.Ticker, model.TickerInfos, prices, model.Share.ClassType);
+            (model.GosBond.Price, model.GosBond.OverallSum) = GetPriceAndOverall(model.GosBond.Ticker, model.TickerInfos, prices, model.GosBond.ClassType);
+            (model.CorpBond.Price, model.CorpBond.OverallSum) = GetPriceAndOverall(model.CorpBond.Ticker, model.TickerInfos, prices, model.CorpBond.ClassType);
+        }
+
+        private static (decimal, decimal) GetPriceAndOverall(string ticker, TickerInfo[] tickerInfos, IDictionary<string, decimal> prices,
+            InstrumentClassType classType)
+            => (prices[ticker],
+                tickerInfos
+                    .Where(x => x.ClassType == classType)
+                    .Sum(x => prices[x.Ticker] * x.Count));
     }
 }

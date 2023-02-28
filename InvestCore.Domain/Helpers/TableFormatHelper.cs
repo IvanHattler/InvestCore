@@ -6,7 +6,7 @@ namespace InvestCore.Domain.Helpers
     {
         public static string ToMonospaceFontString(string str) => '`' + str + '`';
 
-        public static string GetTable(string[][] data, int minSpacesBetweenColumns, string separator)
+        public static string GetTable(string[][] data, int minSpacesBetweenColumns, string separator, bool needToMakeMonospaceFont = true)
         {
             var strCountInOneLine = data.First().Length;
 
@@ -21,7 +21,10 @@ namespace InvestCore.Domain.Helpers
 
             AddDashLines(resultLines, maxLengthOfStrings, separator);
 
-            return ToMonospaceFontString(ToString(resultLines));
+            if (needToMakeMonospaceFont)
+                return ToMonospaceFontString(ToString(resultLines));
+
+            return ToString(resultLines);
         }
 
         private static List<string> GetFormattedLinesForTable(string[][] data, int minSpacesBetweenColumns, string separator, int strCountInOneLine, int[] maxLengthOfStrings)

@@ -10,7 +10,7 @@ namespace InvestCore.PercentCalculateConsole.Domain
         public InstrumentCalculationModel CorpBond { get; set; }
         public TickerInfo[] TickerInfos { get; set; }
 
-        public (string, InstrumentType)[] GetTickers()
+        public (string, InstrumentType)[] GetTickersForBuy()
             => new[]
             {
                 (Share.Ticker, Share.TickerType),

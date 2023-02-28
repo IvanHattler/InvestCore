@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Autofac;
+using InvestCore.Domain.Services.Implementation;
 using InvestCore.Domain.Services.Interfaces;
 using InvestCore.PercentCalculateConsole.Domain;
 using InvestCore.PercentCalculateConsole.Services.Implementation;
@@ -64,7 +65,7 @@ internal class Program
 
         builder.RegisterType<SelectBestBuyModelStrategyByMul>().SingleInstance().As<ISelectBestBuyModelStrategy>();
         builder.RegisterType<BuyModelService>().SingleInstance().As<IBuyModelService>();
-        builder.RegisterType<TinkoffApiService>().SingleInstance().As<IShareService>();
+        builder.RegisterType<FakeShareService>().SingleInstance().As<IShareService>();
         builder.RegisterType<StockPortfolioService>().SingleInstance().As<IStockPortfolioService>();
         builder.Register(c => InvestApiClientFactory.Create(tinkoffToken)).SingleInstance();
         builder.RegisterType<MessageService>().SingleInstance().As<IMessageService>();

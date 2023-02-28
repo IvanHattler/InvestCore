@@ -52,36 +52,43 @@ namespace InvestCore.TinkoffApi.Services
 
         private async Task<decimal?> GetCurrentPrice(string symbol, InstrumentType type)
         {
-            switch (type)
+            try
             {
-                case InstrumentType.Share:
-                    {
-                        var share = (await _investApiClient.Instruments.ShareByAsync(
-                                        new InstrumentRequest()
-                                        {
-                                            IdType = InstrumentIdType.Ticker,
-                                            ClassCode = "TQBR",
-                                            Id = symbol,
-                                        }
-                                    )).Instrument;
+                switch (type)
+                {
+                    case InstrumentType.Share:
+                        {
+                            var share = (await _investApiClient.Instruments.ShareByAsync(
+                                            new InstrumentRequest()
+                                            {
+                                                IdType = InstrumentIdType.Ticker,
+                                                ClassCode = "TQBR",
+                                                Id = symbol,
+                                            }
+                                        )).Instrument;
 
-                        return await GetByCandles(share.Figi);
-                    }
-                case InstrumentType.Bond:
-                    {
-                        var bond = (await _investApiClient.Instruments.BondByAsync(
-                                        new InstrumentRequest()
-                                        {
-                                            IdType = InstrumentIdType.Ticker,
-                                            ClassCode = "TQCB",
-                                            Id = symbol,
-                                        }
-                                    )).Instrument;
+                            return await GetByCandles(share.Figi);
+                        }
+                    case InstrumentType.Bond:
+                        {
+                            var bond = (await _investApiClient.Instruments.BondByAsync(
+                                            new InstrumentRequest()
+                                            {
+                                                IdType = InstrumentIdType.Ticker,
+                                                ClassCode = "TQCB",
+                                                Id = symbol,
+                                            }
+                                        )).Instrument;
 
-                        return await CalculateBondPrice(bond);
-                    }
-                default:
-                    throw new NotImplementedException();
+                            return await CalculateBondPrice(bond);
+                        }
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+            finally
+            {
+                _logger.LogInformation("Выполнено 2 запроса к TinkoffApi");
             }
         }
 
