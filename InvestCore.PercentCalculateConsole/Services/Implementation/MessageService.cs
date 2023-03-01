@@ -23,17 +23,23 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
         public string GetResultMessage(StockPortfolioCalculationModel stockPortfolio)
         {
             var sb = new StringBuilder();
+            sb.AppendLine();
+            sb.AppendLine("-----------------Текущая стоимость портфеля-----------------");
+            sb.AppendLine();
             sb.AppendLine(GetPricesTable(stockPortfolio));
-
-            sb.AppendLine("--------------------------Месяц №0--------------------------");
             sb.AppendLine(GetOverallMessage(stockPortfolio));
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 12; i++)
             {
                 var bestModel = _buyModelService.CalculateBestBuyModel(stockPortfolio.Share,
                     stockPortfolio.GosBond, stockPortfolio.CorpBond, stockPortfolio.Replenishment);
 
                 sb.AppendLine($"--------------------------Месяц №{i + 1}--------------------------");
+                sb.AppendLine($"Инструменты для покупки: акции {stockPortfolio.Share.Ticker}, " +
+                    $"гос. облигации {stockPortfolio.GosBond.Ticker}, " +
+                    $"корп. облигации {stockPortfolio.CorpBond.Ticker}");
+                sb.AppendLine();
+                sb.AppendLine($"Сумма для покупки: {stockPortfolio.Replenishment.SumForBuy} руб.");
                 sb.AppendLine();
                 sb.AppendLine(GetBuyMessage(bestModel));
 
@@ -61,6 +67,7 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
         public string GetOverallMessage(decimal newOverallShares, decimal newOverallGosBonds, decimal newOverallCorpBonds, decimal newOverall)
         {
             return Environment.NewLine +
+                $"Акции\t\tГос. облигации\tКорп. облигации" + Environment.NewLine +
                 $"{newOverallShares:F}\t{newOverallGosBonds:F}\t{newOverallCorpBonds:F}" + Environment.NewLine +
                 $"{newOverallShares / newOverall:P4}\t{newOverallGosBonds / newOverall:P4}\t{newOverallCorpBonds / newOverall:P4}"
                 + Environment.NewLine + Environment.NewLine;

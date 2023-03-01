@@ -10,6 +10,11 @@ namespace InvestCore.Domain.Services.Implementation
 {
     public class FakeShareService : IShareService
     {
+        public Task<Dictionary<string, decimal>> GetClosePricesAsync(IEnumerable<(string, InstrumentType)> symbols)
+        {
+            return GetPricesAsync(symbols);
+        }
+
         public Task<Dictionary<string, decimal>> GetPricesAsync(IEnumerable<(string, InstrumentType)> symbols)
         {
             var rand = new Random();

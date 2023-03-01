@@ -4,6 +4,7 @@ using InvestCore.Domain.Services.Implementation;
 using InvestCore.Domain.Services.Interfaces;
 using InvestCore.PercentCalculateConsole.Services.Implementation;
 using InvestCore.PercentCalculateConsole.Services.Interfaces;
+using InvestCore.TinkoffApi.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Tinkoff.InvestApi;
@@ -41,7 +42,7 @@ namespace InvestCore.PercentCalculateConsole.IoC
 
             builder.RegisterType<SelectBestBuyModelStrategyByMul>().SingleInstance().As<ISelectBestBuyModelStrategy>();
             builder.RegisterType<BuyModelService>().SingleInstance().As<IBuyModelService>();
-            builder.RegisterType<FakeShareService>().SingleInstance().As<IShareService>();
+            builder.RegisterType<TinkoffApiService>().SingleInstance().As<IShareService>();
             builder.RegisterType<StockPortfolioService>().SingleInstance().As<IStockPortfolioService>();
             builder.Register(c => InvestApiClientFactory.Create(tinkoffToken)).SingleInstance();
             builder.RegisterType<MessageService>().SingleInstance().As<IMessageService>();
