@@ -148,10 +148,10 @@ namespace PercentCalculateConsole.Services.Implementation
                 + Environment.NewLine;
         }
 
-        private string GetPricesTable(StockPortfolioCalculationModel stockPortfolio, Dictionary<string, decimal> stockPortfolioPrices)
+        private static string GetPricesTable(StockPortfolioCalculationModel stockPortfolio, Dictionary<string, decimal> stockPortfolioPrices)
         {
             var data = ToDataArrays(stockPortfolio.TickerInfos
-                .Select(x => new PriceInfo
+                .Select(x => new TickerPriceInfo
                 {
                     Count = x.Count,
                     Price = stockPortfolioPrices[x.Ticker],
@@ -161,7 +161,7 @@ namespace PercentCalculateConsole.Services.Implementation
             return TableFormatHelper.GetTable(data, 0, "|", needToMakeMonospaceFont: false);
         }
 
-        private static string[][] ToDataArrays(IEnumerable<PriceInfo> models)
+        private static string[][] ToDataArrays(IEnumerable<TickerPriceInfo> models)
         {
             var data = new string[models.Count() + 2][];
             int i = 0;

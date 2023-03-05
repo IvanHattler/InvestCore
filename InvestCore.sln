@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvestCore.TinkoffApi", "In
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PercentCalculateConsole", "PercentCalculateConsole\PercentCalculateConsole.csproj", "{02C74728-6815-4EA8-8295-AE4F8A59C199}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpreadsheetExporter", "SpreadsheetExporter\SpreadsheetExporter.csproj", "{F11D327E-CB81-4502-8F71-BEBB0C971DAE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{02C74728-6815-4EA8-8295-AE4F8A59C199}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02C74728-6815-4EA8-8295-AE4F8A59C199}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02C74728-6815-4EA8-8295-AE4F8A59C199}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F11D327E-CB81-4502-8F71-BEBB0C971DAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F11D327E-CB81-4502-8F71-BEBB0C971DAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F11D327E-CB81-4502-8F71-BEBB0C971DAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F11D327E-CB81-4502-8F71-BEBB0C971DAE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

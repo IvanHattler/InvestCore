@@ -3,7 +3,7 @@ using PercentCalculateConsole.Domain;
 
 namespace InvestCore.PercentCalculateConsole.Domain
 {
-    public class TickerInfo : TickerInfoBase
+    public class TickerInfo : TickerInfoWithCount
     {
         public InstrumentClassType ClassType { get; set; }
     }

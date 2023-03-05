@@ -2,16 +2,11 @@
 
 namespace InvestCore.Domain.Models
 {
-    public class TickerInfoModel : TickerInfoBase
+    public class TickerInfoModel : TickerPriceInfo
     {
         public string DisplayName { get; set; }
 
         public decimal LastPrice { get; set; }
-
-        public decimal Price { get; set; }
-
-        [JsonIgnore]
-        public decimal Value => Count * Price;
 
         [JsonIgnore]
         public decimal Difference => Value - LastValue;
