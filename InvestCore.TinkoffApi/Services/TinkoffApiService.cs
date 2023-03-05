@@ -295,7 +295,7 @@ namespace InvestCore.TinkoffApi.Services
         {
             var response = await _investApiClient.MarketData.GetCandlesAsync(new GetCandlesRequest()
             {
-                From = DateTime.UtcNow.AddDays(-1).ToTimestamp(),
+                From = DateTime.UtcNow.AddDays(-3).ToTimestamp(),
                 To = DateTime.UtcNow.ToUniversalTime().ToTimestamp(),
                 Figi = figi,
                 Interval = CandleInterval.Day,

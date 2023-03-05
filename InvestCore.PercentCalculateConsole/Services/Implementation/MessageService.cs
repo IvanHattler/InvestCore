@@ -45,7 +45,7 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
 
                 var bestModel = _buyModelService.CalculateBestBuyModel(stockPortfolio.Share,
                     stockPortfolio.GosBond, stockPortfolio.CorpBond, stockPortfolio.Replenishment);
-                sb.AppendLine(GetShortBuyMessage(bestModel));
+                sb.AppendLine(GetBuyMessage(bestModel));
 
                 if (bestModel != null)
                 {
