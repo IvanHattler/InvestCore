@@ -35,6 +35,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решен
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configs", "configs", "{07DD986F-E385-43C2-92B2-F0927A22A419}"
+	ProjectSection(SolutionItems) = preProject
+		configs\tinkoff-token.json = configs\tinkoff-token.json
+		configs\ticker-infos.json = configs\ticker-infos.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

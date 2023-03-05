@@ -5,6 +5,7 @@ using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using InvestCore.Domain.Services.Implementation;
 using InvestCore.Domain.Services.Interfaces;
+using InvestCore.TinkoffApi.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadsheetExporter.Domain;
@@ -22,6 +23,8 @@ namespace PercentCalculateConsole.IoC
                 .AddEnvironmentVariables()
                 .AddUserSecrets(Assembly.GetExecutingAssembly())
                 .AddJsonFile("config.json", false)
+                .AddJsonFile("ticker-infos.json", false)
+                .AddJsonFile("tinkoff-token.json", false)
                 .Build();
         }
 
@@ -43,7 +46,7 @@ namespace PercentCalculateConsole.IoC
 
             #region Services
 
-            builder.RegisterType<FakeShareService>().SingleInstance().As<IShareService>();
+            builder.RegisterType<TinkoffApiService>().SingleInstance().As<IShareService>();
             builder.RegisterType<WorkflowService>().SingleInstance().As<IWorkflowService>();
             builder.Register(c => InvestApiClientFactory.Create(tinkoffToken)).SingleInstance();
             builder.Register(c =>

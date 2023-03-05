@@ -1,6 +1,4 @@
 {
-  "TinkoffToken": "t._IYKRhjFif80a-RomO3xt5KxiZvliL-YTlZWoEBAgwyh8ymCtCRZEb5CE78JcJzlsaA8yB2f5yaQP6-qz2256Q",
-
   "StockPortfolioCalculationModel": {
     "Replenishment": {
       "ReplenishmentAmount": 25000,
@@ -25,87 +23,6 @@
       "TargetPercent": 0.05,
       "Ticker": "SBRB",
       "TickerType": 2
-    },
-
-    "TickerInfos": [
-      {
-        "Ticker": "SBER",
-        "ClassType": 0,
-        "Count": 80,
-        "TickerType": 0
-      },
-      {
-        "Ticker": "SNGSP",
-        "ClassType": 0,
-        "Count": 1000,
-        "TickerType": 0
-      },
-      {
-        "Ticker": "MTSS",
-        "ClassType": 0,
-        "Count": 100,
-        "TickerType": 0
-      },
-      {
-        "Ticker": "MGNT",
-        "ClassType": 0,
-        "Count": 4,
-        "TickerType": 0
-      },
-      {
-        "Ticker": "OGKB",
-        "ClassType": 0,
-        "Count": 40000,
-        "TickerType": 0
-      },
-      {
-        "Ticker": "LKOH",
-        "ClassType": 0,
-        "Count": 7,
-        "TickerType": 0
-      },
-      {
-        "Ticker": "RASP",
-        "ClassType": 0,
-        "Count": 70,
-        "TickerType": 0
-      },
-      {
-        "Ticker": "MAGN",
-        "ClassType": 0,
-        "Count": 400,
-        "TickerType": 0
-      },
-      {
-        "Ticker": "PHOR",
-        "ClassType": 0,
-        "Count": 2,
-        "TickerType": 0
-      },
-      {
-        "Ticker": "RU000A103WV8",
-        "ClassType": 2,
-        "Count": 30,
-        "TickerType": 1
-      },
-      {
-        "Ticker": "SBMX",
-        "ClassType": 0,
-        "Count": 2800,
-        "TickerType": 2
-      },
-      {
-        "Ticker": "SBGB",
-        "ClassType": 1,
-        "Count": 1505,
-        "TickerType": 2
-      },
-      {
-        "Ticker": "BOND",
-        "ClassType": 2,
-        "Count": 3,
-        "TickerType": 2
-      }
-    ]
+    }
   }
 }
