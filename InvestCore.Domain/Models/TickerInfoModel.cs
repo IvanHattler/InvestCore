@@ -2,15 +2,9 @@
 
 namespace InvestCore.Domain.Models
 {
-    public class TickerInfoModel
+    public class TickerInfoModel : TickerInfoBase
     {
         public string DisplayName { get; set; }
-
-        public string Ticker { get; set; }
-
-        public InstrumentType Type { get; set; }
-
-        public int Count { get; set; }
 
         public decimal LastPrice { get; set; }
 
@@ -33,7 +27,7 @@ namespace InvestCore.Domain.Models
             Ticker = ticker ?? throw new ArgumentNullException(nameof(ticker));
             DisplayName = displayName ?? throw new ArgumentNullException(nameof(displayName));
             Count = count;
-            Type = type;
+            TickerType = type;
         }
     }
 }
