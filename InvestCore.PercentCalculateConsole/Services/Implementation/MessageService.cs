@@ -11,29 +11,30 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
     {
         private readonly IStockPortfolioService _stockPortfolioService;
         private readonly IBuyModelService _buyModelService;
-        private readonly IShareService _shareService;
+        private readonly IMetricStrategy _metricStrategy;
 
-        public MessageService(IStockPortfolioService stockPortfolioService, IBuyModelService buyModelService, IShareService shareService)
+        public MessageService(IStockPortfolioService stockPortfolioService, IBuyModelService buyModelService,
+            IMetricStrategy metricStrategy)
         {
             _stockPortfolioService = stockPortfolioService;
             _buyModelService = buyModelService;
-            _shareService = shareService;
+            _metricStrategy = metricStrategy;
         }
 
         public string GetResultMessage(StockPortfolioCalculationModel stockPortfolio)
         {
+            var stockPortfolioPrices = _stockPortfolioService.GetStockProfilePrices(stockPortfolio);
+            _stockPortfolioService.LoadPricesToModel(stockPortfolio, stockPortfolioPrices);
+
             var sb = new StringBuilder();
             sb.AppendLine();
             sb.AppendLine("-----------------Текущая стоимость портфеля-----------------");
             sb.AppendLine();
-            sb.AppendLine(GetPricesTable(stockPortfolio));
+            sb.AppendLine(GetPricesTable(stockPortfolio, stockPortfolioPrices));
             sb.AppendLine(GetOverallMessage(stockPortfolio));
 
-            for (int i = 0; i < 12; i++)
+            for (int i = 0; i < 3; i++)
             {
-                var bestModel = _buyModelService.CalculateBestBuyModel(stockPortfolio.Share,
-                    stockPortfolio.GosBond, stockPortfolio.CorpBond, stockPortfolio.Replenishment);
-
                 sb.AppendLine($"--------------------------Месяц №{i + 1}--------------------------");
                 sb.AppendLine($"Инструменты для покупки: акции {stockPortfolio.Share.Ticker}, " +
                     $"гос. облигации {stockPortfolio.GosBond.Ticker}, " +
@@ -41,7 +42,56 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
                 sb.AppendLine();
                 sb.AppendLine($"Сумма для покупки: {stockPortfolio.Replenishment.SumForBuy} руб.");
                 sb.AppendLine();
-                sb.AppendLine(GetBuyMessage(bestModel));
+
+                var bestModel = _buyModelService.CalculateBestBuyModel(stockPortfolio.Share,
+                    stockPortfolio.GosBond, stockPortfolio.CorpBond, stockPortfolio.Replenishment);
+                sb.AppendLine(GetShortBuyMessage(bestModel));
+
+                if (bestModel != null)
+                {
+                    _stockPortfolioService.UpdateOverallSum(stockPortfolio, bestModel);
+                    sb.AppendLine(GetOverallMessage(stockPortfolio));
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        public string GetTestResultMessage(StockPortfolioCalculationModel stockPortfolio)
+        {
+            var stockPortfolioPrices = _stockPortfolioService.GetStockProfilePrices(stockPortfolio);
+            _stockPortfolioService.LoadPricesToModel(stockPortfolio, stockPortfolioPrices);
+
+            var sb = new StringBuilder();
+            sb.AppendLine();
+            sb.AppendLine("-----------------Текущая стоимость портфеля-----------------");
+            sb.AppendLine();
+            sb.AppendLine(GetPricesTable(stockPortfolio, stockPortfolioPrices));
+            sb.AppendLine(GetOverallMessage(stockPortfolio));
+
+            for (int i = 0; i < 12; i++)
+            {
+                sb.AppendLine($"--------------------------Месяц №{i + 1}--------------------------");
+                sb.AppendLine($"Акции - Гос. облигации - Корп. облигации");
+                sb.AppendLine($"Остаток средств - % откл. акции - % откл. гос. облигации - % откл. корп. облигации");
+                sb.AppendLine();
+                var models = new List<(BuyModel, decimal, double)>();
+                for (double j = 0.005; j < 0.1; j += 0.001)
+                {
+                    var testModel = _buyModelService.CalculateBestBuyModel(stockPortfolio.Share,
+                        stockPortfolio.GosBond, stockPortfolio.CorpBond, stockPortfolio.Replenishment, stepPercent: j);
+
+                    var message = GetShortBuyMessage(testModel);
+                    if (message != null)
+                    {
+                        //sb.AppendLine($"{j:F3}) " + message);
+                        models.Add((testModel, testModel.GetMetric(_metricStrategy), j));
+                    }
+                }
+
+                var (bestModel, _, coef) = models.OrderBy(x => x.Item2).FirstOrDefault();
+                sb.AppendLine($"Лучшая модель с коэффициентом = {coef:F3}:");
+                sb.AppendLine(GetShortBuyMessage(bestModel));
 
                 if (bestModel != null)
                 {
@@ -87,12 +137,18 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
                 $"Отклонение по корп. облигациям: {model.CorpBondPercentDeviation:P8}";
         }
 
-        private string GetPricesTable(StockPortfolioCalculationModel stockPortfolio)
+        public string GetShortBuyMessage(BuyModel? model)
         {
-            var stockPortfolioPrices = _stockPortfolioService.GetStockProfilePrices(stockPortfolio);
+            if (model == null)
+                return null;
 
-            _stockPortfolioService.LoadPricesToModel(stockPortfolio, stockPortfolioPrices);
+            return $"{model.ShareCounts} - {model.GosBondCounts} - {model.CorpBondCounts} | {model.GetMetric(_metricStrategy):F10} | " +
+                $"{model.SumDifference:F} - {model.SharePercentDeviation:P8} - {model.GosBondPercentDeviation:P8} - {model.CorpBondPercentDeviation:P8}"
+                + Environment.NewLine;
+        }
 
+        private string GetPricesTable(StockPortfolioCalculationModel stockPortfolio, Dictionary<string, decimal> stockPortfolioPrices)
+        {
             var data = ToDataArrays(stockPortfolio.TickerInfos
                 .Select(x => new PriceInfo
                 {

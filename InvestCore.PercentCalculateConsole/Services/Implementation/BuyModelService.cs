@@ -7,12 +7,12 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
     public class BuyModelService : IBuyModelService
     {
         protected const decimal MinPercentForBuy = 0.9m;
-        private ISelectBestBuyModelStrategy _selectBestBuyModelStrategy;
-        private ILogger _logger;
+        private readonly IMetricStrategy _metricStrategy;
+        private readonly ILogger _logger;
 
-        public BuyModelService(ISelectBestBuyModelStrategy selectBestBuyModelStrategy, ILogger logger)
+        public BuyModelService(IMetricStrategy metricStrategy, ILogger logger)
         {
-            _selectBestBuyModelStrategy = selectBestBuyModelStrategy;
+            _metricStrategy = metricStrategy;
             _logger = logger;
         }
 
@@ -20,7 +20,8 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
             InstrumentCalculationModel shareDto,
             InstrumentCalculationModel gosBondDto,
             InstrumentCalculationModel corpBondDto,
-            ReplenishmentModel replenishmentDto)
+            ReplenishmentModel replenishmentDto,
+            double stepPercent = .1)
         {
             decimal sumForBuy = replenishmentDto.SumForBuy;
             decimal minSumForBuy = MinPercentForBuy * sumForBuy;
@@ -29,9 +30,9 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
             var maxGosBondsCount = (int)(sumForBuy / gosBondDto.Price);
             var maxCorpBondsCount = (int)(sumForBuy / corpBondDto.Price);
 
-            int sharesStep = GetStep(maxSharesCount);
-            var gosBondsStep = GetStep(maxGosBondsCount);
-            var corpBondsStep = GetStep(maxCorpBondsCount);
+            int sharesStep = GetStep(maxSharesCount, stepPercent);
+            var gosBondsStep = GetStep(maxGosBondsCount, stepPercent);
+            var corpBondsStep = GetStep(maxCorpBondsCount, stepPercent);
 
             var buyModels = new List<BuyModel>();
 
@@ -71,13 +72,14 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
                 }
             }
 
-            return _selectBestBuyModelStrategy.SelectBestModel(buyModels);
+            return buyModels
+                .OrderBy(x => x.GetMetric(_metricStrategy))
+                .FirstOrDefault();
         }
 
-        private static int GetStep(int maxSharesCount)
+        private static int GetStep(int maxSharesCount, double coef)
         {
-            const double mul = .1;
-            int step = (int)(maxSharesCount * mul);
+            int step = (int)(maxSharesCount * coef);
             return step > 0 ? step : 1;
         }
 

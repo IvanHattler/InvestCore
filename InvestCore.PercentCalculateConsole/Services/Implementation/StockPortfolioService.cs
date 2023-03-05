@@ -27,7 +27,7 @@ namespace InvestCore.PercentCalculateConsole.Services.Implementation
         public Dictionary<string, decimal> GetStockProfilePrices(StockPortfolioCalculationModel stockPortfolio)
         {
             return _shareService
-                .GetClosePricesAsync(stockPortfolio
+                .GetCurrentOrLastPricesAsync(stockPortfolio
                     .GetTickersForBuy()
                     .Union(stockPortfolio.TickerInfos
                         .Select(x => (x.Ticker, x.TickerType))))

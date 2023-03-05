@@ -40,7 +40,7 @@ namespace InvestCore.PercentCalculateConsole.IoC
 
             #region Services
 
-            builder.RegisterType<SelectBestBuyModelStrategyByMul>().SingleInstance().As<ISelectBestBuyModelStrategy>();
+            builder.RegisterType<MulMetricStrategy>().SingleInstance().As<IMetricStrategy>();
             builder.RegisterType<BuyModelService>().SingleInstance().As<IBuyModelService>();
             builder.RegisterType<TinkoffApiService>().SingleInstance().As<IShareService>();
             builder.RegisterType<StockPortfolioService>().SingleInstance().As<IStockPortfolioService>();

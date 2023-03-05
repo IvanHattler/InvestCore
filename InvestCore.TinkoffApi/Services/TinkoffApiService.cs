@@ -51,7 +51,7 @@ namespace InvestCore.TinkoffApi.Services
             return result;
         }
 
-        public async Task<Dictionary<string, decimal>> GetClosePricesAsync(IEnumerable<(string, InstrumentType)> symbols)
+        public async Task<Dictionary<string, decimal>> GetCurrentOrLastPricesAsync(IEnumerable<(string, InstrumentType)> symbols)
         {
             var result = new Dictionary<string, decimal>(symbols.Count());
             try
@@ -60,7 +60,7 @@ namespace InvestCore.TinkoffApi.Services
 
                 foreach (var symbolModel in symbolModels)
                 {
-                    var currentPrice = await GetClosePrice(symbolModel.Figi, symbolModel.Type, symbolModel.Nominal);
+                    var currentPrice = await GetCurrentOrLastPrice(symbolModel.Figi, symbolModel.Type, symbolModel.Nominal);
 
                     if (currentPrice.HasValue)
                     {
@@ -216,7 +216,7 @@ namespace InvestCore.TinkoffApi.Services
             }
         }
 
-        private async Task<decimal?> GetClosePrice(string figi, InstrumentType type, MoneyValue? nominal)
+        private async Task<decimal?> GetCurrentOrLastPrice(string figi, InstrumentType type, MoneyValue? nominal)
         {
             try
             {
@@ -225,11 +225,13 @@ namespace InvestCore.TinkoffApi.Services
                     case InstrumentType.Share:
                     case InstrumentType.Etf:
                         {
-                            return await GetClosePriceByCandles(figi);
+                            return await GetByCandles(figi)
+                                ?? await GetClosePriceByCandles(figi);
                         }
                     case InstrumentType.Bond:
                         {
-                            var price = await GetClosePriceByCandles(figi);
+                            var price = await GetByCandles(figi)
+                                ?? await GetClosePriceByCandles(figi);
 
                             if (price == null)
                                 return null;

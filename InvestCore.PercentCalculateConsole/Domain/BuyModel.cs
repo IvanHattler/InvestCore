@@ -1,4 +1,6 @@
-﻿namespace InvestCore.PercentCalculateConsole.Domain
+﻿using InvestCore.PercentCalculateConsole.Services.Interfaces;
+
+namespace InvestCore.PercentCalculateConsole.Domain
 {
     public class BuyModel
     {
@@ -9,5 +11,8 @@
         public decimal SharePercentDeviation;
         public decimal GosBondPercentDeviation;
         public decimal CorpBondPercentDeviation;
+
+        public decimal GetMetric(IMetricStrategy strategy)
+            => strategy.GetMetric(this);
     }
 }

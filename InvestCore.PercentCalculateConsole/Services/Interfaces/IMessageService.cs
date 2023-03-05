@@ -11,5 +11,7 @@ namespace InvestCore.PercentCalculateConsole.Services.Interfaces
         string GetOverallMessage(StockPortfolioCalculationModel stockPortfolio);
 
         string GetResultMessage(StockPortfolioCalculationModel stockPortfolio);
+
+        string GetTestResultMessage(StockPortfolioCalculationModel stockPortfolio);
     }
 }

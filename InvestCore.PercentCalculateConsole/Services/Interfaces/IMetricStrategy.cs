@@ -2,8 +2,8 @@
 
 namespace InvestCore.PercentCalculateConsole.Services.Interfaces
 {
-    public interface ISelectBestBuyModelStrategy
+    public interface IMetricStrategy
     {
-        BuyModel? SelectBestModel(List<BuyModel> buyModels);
+        decimal GetMetric(BuyModel model);
     }
 }
