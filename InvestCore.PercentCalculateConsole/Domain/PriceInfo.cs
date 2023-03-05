@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace InvestCore.PercentCalculateConsole.Domain
+﻿namespace PercentCalculateConsole.Domain
 {
     public class PriceInfo
     {

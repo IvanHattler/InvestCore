@@ -1,8 +1,8 @@
 ﻿using Autofac;
 using InvestCore.PercentCalculateConsole.Domain;
-using InvestCore.PercentCalculateConsole.IoC;
-using InvestCore.PercentCalculateConsole.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
+using PercentCalculateConsole.IoC;
+using PercentCalculateConsole.Services.Interfaces;
 
 internal class Program
 {

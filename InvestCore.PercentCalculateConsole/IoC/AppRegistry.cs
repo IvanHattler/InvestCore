@@ -2,14 +2,14 @@
 using Autofac;
 using InvestCore.Domain.Services.Implementation;
 using InvestCore.Domain.Services.Interfaces;
-using InvestCore.PercentCalculateConsole.Services.Implementation;
-using InvestCore.PercentCalculateConsole.Services.Interfaces;
 using InvestCore.TinkoffApi.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using PercentCalculateConsole.Services.Implementation;
+using PercentCalculateConsole.Services.Interfaces;
 using Tinkoff.InvestApi;
 
-namespace InvestCore.PercentCalculateConsole.IoC
+namespace PercentCalculateConsole.IoC
 {
     public static class AppRegistry
     {

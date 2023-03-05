@@ -1,4 +1,4 @@
-﻿namespace InvestCore.PercentCalculateConsole.Domain
+﻿namespace PercentCalculateConsole.Domain
 {
     public enum MetricType
     {

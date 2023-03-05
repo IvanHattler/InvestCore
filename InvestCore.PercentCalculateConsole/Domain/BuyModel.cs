@@ -1,6 +1,6 @@
-﻿using InvestCore.PercentCalculateConsole.Services.Interfaces;
+﻿using PercentCalculateConsole.Services.Interfaces;
 
-namespace InvestCore.PercentCalculateConsole.Domain
+namespace PercentCalculateConsole.Domain
 {
     public class BuyModel
     {

@@ -1,10 +1,11 @@
 ﻿using System.Text.Json;
 using InvestCore.Domain.Services.Interfaces;
 using InvestCore.PercentCalculateConsole.Domain;
-using InvestCore.PercentCalculateConsole.Services.Interfaces;
 using Microsoft.Extensions.Logging;
+using PercentCalculateConsole.Domain;
+using PercentCalculateConsole.Services.Interfaces;
 
-namespace InvestCore.PercentCalculateConsole.Services.Implementation
+namespace PercentCalculateConsole.Services.Implementation
 {
     public class StockPortfolioService : IStockPortfolioService
     {
