@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "InvestCore", "InvestCore", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChatBot", "ChatBot", "{8E1B4E35-7B96-4A01-B76F-438DC4DF0E6B}"
 	ProjectSection(SolutionItems) = preProject
-		README.md = README.md
+		ChatBot\README.md = ChatBot\README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatBot", "ChatBot\ChatBot\ChatBot.csproj", "{2488A1C8-D57E-419B-A89A-7620B356C1F7}"
@@ -31,6 +31,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{F9A8B1C5-B5CA-45F3-8E6F-C06C687301E2}"
 	ProjectSection(SolutionItems) = preProject
 		InvestCoreCodeMap.dgml = InvestCoreCodeMap.dgml
+		LICENSE.txt = LICENSE.txt
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global
