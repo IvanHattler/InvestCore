@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using Autofac;
-using InvestCore.Domain.Services.Implementation;
 using InvestCore.Domain.Services.Interfaces;
 using InvestCore.TinkoffApi.Services;
 using Microsoft.Extensions.Configuration;

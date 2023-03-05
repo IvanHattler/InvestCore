@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using Google.Protobuf.WellKnownTypes;
+﻿using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using InvestCore.Domain.Services.Interfaces;
 using InvestCore.TinkoffApi.Domain;
@@ -118,7 +117,7 @@ namespace InvestCore.TinkoffApi.Services
                                                  Id = symbol,
                                              })).Instrument;
 
-                             return (share.Figi, null);
+                            return (share.Figi, null);
                         }
                     case InstrumentType.Bond:
                         {
@@ -247,7 +246,6 @@ namespace InvestCore.TinkoffApi.Services
                 _logger.LogInformation("Выполнен запрос к TinkoffApi");
             }
         }
-
 
         private async Task<decimal?> CalculateBondPrice(string figi, MoneyValue nominal, decimal price)
         {

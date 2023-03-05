@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using InvestCore.Domain.Services.Interfaces;
+﻿using InvestCore.Domain.Services.Interfaces;
 using InvestCore.PercentCalculateConsole.Domain;
 using Microsoft.Extensions.Logging;
 using PercentCalculateConsole.Domain;

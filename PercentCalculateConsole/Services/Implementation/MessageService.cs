@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using InvestCore.Domain.Helpers;
 using InvestCore.Domain.Models;
-using InvestCore.Domain.Services.Interfaces;
 using InvestCore.PercentCalculateConsole.Domain;
 using PercentCalculateConsole.Domain;
 using PercentCalculateConsole.Services.Interfaces;

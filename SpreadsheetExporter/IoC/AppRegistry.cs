@@ -5,7 +5,6 @@ using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using InvestCore.Domain.Services.Implementation;
 using InvestCore.Domain.Services.Interfaces;
-using InvestCore.TinkoffApi.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadsheetExporter.Domain;
@@ -26,7 +25,6 @@ namespace PercentCalculateConsole.IoC
                 .Build();
         }
 
-
         public static IContainer BuildContainer(string tinkoffToken, SpreadsheetConfig spreadsheetConfig)
         {
             var builder = new ContainerBuilder();
@@ -44,7 +42,6 @@ namespace PercentCalculateConsole.IoC
             #endregion Logger
 
             #region Services
-
 
             builder.RegisterType<FakeShareService>().SingleInstance().As<IShareService>();
             builder.RegisterType<WorkflowService>().SingleInstance().As<IWorkflowService>();
