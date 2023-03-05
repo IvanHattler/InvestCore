@@ -81,9 +81,9 @@ namespace PercentCalculateConsole.Services.Implementation
                     var testModel = _buyModelService.CalculateBestBuyModel(stockPortfolio.Share,
                         stockPortfolio.GosBond, stockPortfolio.CorpBond, stockPortfolio.Replenishment, stepPercent: j);
 
-                    var message = GetShortBuyMessage(testModel);
-                    if (message != null)
+                    if (testModel != null)
                     {
+                        //var message = GetShortBuyMessage(testModel);
                         //sb.AppendLine($"{j:F3}) " + message);
                         models.Add((testModel, testModel.GetMetric(_metricStrategy), j));
                     }
@@ -137,7 +137,7 @@ namespace PercentCalculateConsole.Services.Implementation
                 $"Отклонение по корп. облигациям: {model.CorpBondPercentDeviation:P8}";
         }
 
-        public string GetShortBuyMessage(BuyModel? model)
+        public string? GetShortBuyMessage(BuyModel? model)
         {
             if (model == null)
                 return null;

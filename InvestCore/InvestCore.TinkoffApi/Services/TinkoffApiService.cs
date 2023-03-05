@@ -229,6 +229,9 @@ namespace InvestCore.TinkoffApi.Services
                         }
                     case InstrumentType.Bond:
                         {
+                            if (nominal == null)
+                                return null;
+
                             var price = await GetByCandles(figi)
                                 ?? await GetClosePriceByCandles(figi);
 
@@ -284,7 +287,7 @@ namespace InvestCore.TinkoffApi.Services
             return null;
         }
 
-        private decimal CalculatePriceByCandle(HistoricCandle candle)
+        private static decimal CalculatePriceByCandle(HistoricCandle candle)
         {
             return candle.Open;
         }

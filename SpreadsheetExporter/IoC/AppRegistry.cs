@@ -53,7 +53,7 @@ namespace PercentCalculateConsole.IoC
                 {
                     HttpClientInitializer = GoogleCredential
                         .FromStream(stream)
-                        .CreateScoped(spreadsheetConfig.Scopes),
+                        .CreateScoped(SpreadsheetConfig.Scopes),
                     ApplicationName = spreadsheetConfig.ApplicationName,
                 });
             }).SingleInstance();
