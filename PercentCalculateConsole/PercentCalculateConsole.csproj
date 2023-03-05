@@ -19,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\InvestCore.Domain\InvestCore.Domain.csproj" />
-    <ProjectReference Include="..\InvestCore.TinkoffApi\InvestCore.TinkoffApi.csproj" />
+    <ProjectReference Include="..\InvestCore\InvestCore.Domain\InvestCore.Domain.csproj" />
+    <ProjectReference Include="..\InvestCore\InvestCore.TinkoffApi\InvestCore.TinkoffApi.csproj" />
   </ItemGroup>
 
   <ItemGroup>
