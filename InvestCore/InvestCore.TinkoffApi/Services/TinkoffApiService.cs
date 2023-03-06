@@ -13,6 +13,10 @@ namespace InvestCore.TinkoffApi.Services
     {
         private readonly InvestApiClient _investApiClient;
         private readonly ILogger _logger;
+        private readonly Dictionary<string, decimal> _defaultPrices = new Dictionary<string, decimal>()
+        {
+            { "SBGD", 13.69m },
+        };
 
         public TinkoffApiService(InvestApiClient investApiClient, ILogger logger)
         {
@@ -53,11 +57,11 @@ namespace InvestCore.TinkoffApi.Services
         public async Task<Dictionary<string, decimal>> GetCurrentOrLastPricesAsync(IEnumerable<(string, InstrumentType)> symbols)
         {
             var result = new Dictionary<string, decimal>(symbols.Count());
-            try
-            {
-                var symbolModels = await GetSymbolModels(symbols);
+            var symbolModels = await GetSymbolModels(symbols);
 
-                foreach (var symbolModel in symbolModels)
+            foreach (var symbolModel in symbolModels)
+            {
+                try
                 {
                     var currentPrice = await GetCurrentOrLastPrice(symbolModel.Figi, symbolModel.Type, symbolModel.Nominal);
 
@@ -66,16 +70,28 @@ namespace InvestCore.TinkoffApi.Services
                         result.TryAdd(symbolModel.Symbol, currentPrice.Value);
                     }
                 }
-            }
-            catch (RpcException e)
-            {
-                if (e.StatusCode == StatusCode.Unauthenticated)
+                catch (RpcException e)
                 {
-                    _logger.LogCritical("Tinkoff token is irrelevant");
+                    if (e.StatusCode == StatusCode.Unauthenticated)
+                    {
+                        _logger.LogCritical("Tinkoff token is irrelevant");
+                    }
+                    if (e.StatusCode == StatusCode.NotFound)
+                    {
+                        _logger.LogCritical("Ticker not found");
+                    }
                 }
-                if (e.StatusCode == StatusCode.NotFound)
+            }
+
+            if (result.Count < symbols.Count())
+            {
+                foreach (var (symbol, _) in symbols.Where(x => !result.ContainsKey(x.Item1)))
                 {
-                    _logger.LogCritical("Ticker not found");
+                    if (_defaultPrices.ContainsKey(symbol))
+                    {
+                        result.TryAdd(symbol, _defaultPrices[symbol]);
+                        _logger.LogWarning("Used default price for {symbol}", symbol);
+                    }
                 }
             }
 
@@ -88,14 +104,28 @@ namespace InvestCore.TinkoffApi.Services
 
             foreach (var (symbol, type) in symbols)
             {
-                var figiAndNominal = await GetFigiAndNominal(symbol, type);
-                res.Add(new SymbolModel()
+                try
                 {
-                    Symbol = symbol,
-                    Type = type,
-                    Figi = figiAndNominal.Item1,
-                    Nominal = figiAndNominal.Item2,
-                });
+                    var figiAndNominal = await GetFigiAndNominal(symbol, type);
+                    res.Add(new SymbolModel()
+                    {
+                        Symbol = symbol,
+                        Type = type,
+                        Figi = figiAndNominal.Item1,
+                        Nominal = figiAndNominal.Item2,
+                    });
+                }
+                catch (RpcException e)
+                {
+                    if (e.StatusCode == StatusCode.Unauthenticated)
+                    {
+                        _logger.LogCritical("Tinkoff token is irrelevant");
+                    }
+                    if (e.StatusCode == StatusCode.NotFound)
+                    {
+                        _logger.LogCritical("Ticker not found");
+                    }
+                }
             }
 
             return res;

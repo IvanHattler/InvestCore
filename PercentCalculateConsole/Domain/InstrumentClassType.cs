@@ -5,5 +5,6 @@
         Share,
         GosBond,
         CorpBond,
+        Gold,
     }
 }

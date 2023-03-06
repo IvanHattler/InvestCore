@@ -11,6 +11,7 @@ namespace PercentCalculateConsole.Services.Implementation
             => model.SumDifference
                 * (AdditionCoef + model.SharePercentDeviation)
                 * (AdditionCoef + model.GosBondPercentDeviation)
-                * (AdditionCoef + model.CorpBondPercentDeviation);
+                * (AdditionCoef + model.CorpBondPercentDeviation)
+                * (AdditionCoef + model.GoldPercentDeviation);
     }
 }

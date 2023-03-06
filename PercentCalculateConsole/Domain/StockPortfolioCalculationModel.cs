@@ -9,6 +9,7 @@ namespace InvestCore.PercentCalculateConsole.Domain
         public InstrumentCalculationModel Share { get; set; }
         public InstrumentCalculationModel GosBond { get; set; }
         public InstrumentCalculationModel CorpBond { get; set; }
+        public InstrumentCalculationModel Gold { get; set; }
         public TickerInfo[] TickerInfos { get; set; }
 
         public (string, InstrumentType)[] GetTickersForBuy()
@@ -17,6 +18,7 @@ namespace InvestCore.PercentCalculateConsole.Domain
                 (Share.Ticker, Share.TickerType),
                 (GosBond.Ticker, GosBond.TickerType),
                 (CorpBond.Ticker, CorpBond.TickerType),
+                (Gold.Ticker, Gold.TickerType),
             };
     }
 }

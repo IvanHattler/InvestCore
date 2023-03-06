@@ -6,5 +6,6 @@
         SharePercentDeviation,
         GosBondPercentDeviation,
         CorpBondPercentDeviation,
+        GoldPercentDeviation,
     }
 }

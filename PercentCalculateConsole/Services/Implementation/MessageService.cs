@@ -38,13 +38,14 @@ namespace PercentCalculateConsole.Services.Implementation
                 sb.AppendLine($"--------------------------Месяц №{i + 1}--------------------------");
                 sb.AppendLine($"Инструменты для покупки: акции {stockPortfolio.Share.Ticker}, " +
                     $"гос. облигации {stockPortfolio.GosBond.Ticker}, " +
-                    $"корп. облигации {stockPortfolio.CorpBond.Ticker}");
+                    $"корп. облигации {stockPortfolio.CorpBond.Ticker}, " +
+                    $"золото {stockPortfolio.Gold.Ticker}");
                 sb.AppendLine();
                 sb.AppendLine($"Сумма для покупки: {stockPortfolio.Replenishment.SumForBuy} руб.");
                 sb.AppendLine();
 
                 var bestModel = _buyModelService.CalculateBestBuyModel(stockPortfolio.Share,
-                    stockPortfolio.GosBond, stockPortfolio.CorpBond, stockPortfolio.Replenishment);
+                    stockPortfolio.GosBond, stockPortfolio.CorpBond, stockPortfolio.Gold, stockPortfolio.Replenishment);
                 sb.AppendLine(GetBuyMessage(bestModel));
 
                 if (bestModel != null)
@@ -79,7 +80,7 @@ namespace PercentCalculateConsole.Services.Implementation
                 for (double j = 0.005; j < 0.1; j += 0.001)
                 {
                     var testModel = _buyModelService.CalculateBestBuyModel(stockPortfolio.Share,
-                        stockPortfolio.GosBond, stockPortfolio.CorpBond, stockPortfolio.Replenishment, stepPercent: j);
+                        stockPortfolio.GosBond, stockPortfolio.CorpBond, stockPortfolio.Gold, stockPortfolio.Replenishment, stepPercent: j);
 
                     if (testModel != null)
                     {
@@ -107,19 +108,24 @@ namespace PercentCalculateConsole.Services.Implementation
         {
             var overall = stockPortfolio.Share.OverallSum
                 + stockPortfolio.GosBond.OverallSum
-                + stockPortfolio.CorpBond.OverallSum;
+                + stockPortfolio.CorpBond.OverallSum
+                + stockPortfolio.Gold.OverallSum;
 
             return GetOverallMessage(stockPortfolio.Share.OverallSum,
                 stockPortfolio.GosBond.OverallSum,
-                stockPortfolio.CorpBond.OverallSum, overall);
+                stockPortfolio.CorpBond.OverallSum,
+                stockPortfolio.Gold.OverallSum,
+                overall);
         }
 
-        public string GetOverallMessage(decimal newOverallShares, decimal newOverallGosBonds, decimal newOverallCorpBonds, decimal newOverall)
+        public string GetOverallMessage(decimal newOverallShares, decimal newOverallGosBonds, decimal newOverallCorpBonds,
+            decimal newOverallGold, decimal newOverall)
         {
             return Environment.NewLine +
-                $"Акции\t\tГос. облигации\tКорп. облигации" + Environment.NewLine +
-                $"{newOverallShares:F}\t{newOverallGosBonds:F}\t{newOverallCorpBonds:F}" + Environment.NewLine +
-                $"{newOverallShares / newOverall:P4}\t{newOverallGosBonds / newOverall:P4}\t{newOverallCorpBonds / newOverall:P4}"
+                $"Акции\t\tГос. облигации\tКорп. облигации\tЗолото" + Environment.NewLine +
+                $"{newOverallShares:F}\t{newOverallGosBonds:F}\t{newOverallCorpBonds:F}\t{newOverallGold:F}" + Environment.NewLine +
+                $"{newOverallShares / newOverall:P4}\t{newOverallGosBonds / newOverall:P4}\t{newOverallCorpBonds / newOverall:P4}" +
+                $"\t{newOverallGold / newOverall:P4}"
                 + Environment.NewLine + Environment.NewLine;
         }
 
@@ -130,11 +136,13 @@ namespace PercentCalculateConsole.Services.Implementation
 
             return $"{model.ShareCounts} акций, " +
                 $"{model.GosBondCounts} гос. облигаций, " +
-                $"{model.CorpBondCounts} корп. облигаций." + Environment.NewLine + Environment.NewLine +
+                $"{model.CorpBondCounts} корп. облигаций, " +
+                $"{model.GoldCounts} золота." + Environment.NewLine + Environment.NewLine +
                 $"Отстаток средств: {model.SumDifference:F}." + Environment.NewLine +
                 $"Отклонение по акциям: {model.SharePercentDeviation:P8}, " + Environment.NewLine +
                 $"Отклонение по гос. облигациям: {model.GosBondPercentDeviation:P8}, " + Environment.NewLine +
-                $"Отклонение по корп. облигациям: {model.CorpBondPercentDeviation:P8}";
+                $"Отклонение по корп. облигациям: {model.CorpBondPercentDeviation:P8}, " + Environment.NewLine +
+                $"Отклонение по золоту: {model.GoldPercentDeviation:P8}";
         }
 
         public string? GetShortBuyMessage(BuyModel? model)
@@ -142,8 +150,9 @@ namespace PercentCalculateConsole.Services.Implementation
             if (model == null)
                 return null;
 
-            return $"{model.ShareCounts} - {model.GosBondCounts} - {model.CorpBondCounts} | {model.GetMetric(_metricStrategy):F10} | " +
-                $"{model.SumDifference:F} - {model.SharePercentDeviation:P8} - {model.GosBondPercentDeviation:P8} - {model.CorpBondPercentDeviation:P8}"
+            return $"{model.ShareCounts} - {model.GosBondCounts} - {model.CorpBondCounts} - {model.GoldCounts} | {model.GetMetric(_metricStrategy):F10} | " +
+                $"{model.SumDifference:F} - {model.SharePercentDeviation:P8} - {model.GosBondPercentDeviation:P8} - {model.CorpBondPercentDeviation:P8} - " +
+                $"{model.GoldPercentDeviation:P8}"
                 + Environment.NewLine;
         }
 

@@ -20,6 +20,7 @@ namespace PercentCalculateConsole.Services.Implementation
             InstrumentCalculationModel shareDto,
             InstrumentCalculationModel gosBondDto,
             InstrumentCalculationModel corpBondDto,
+            InstrumentCalculationModel gold,
             ReplenishmentModel replenishmentDto,
             double stepPercent = .1)
         {
@@ -29,10 +30,12 @@ namespace PercentCalculateConsole.Services.Implementation
             var maxSharesCount = (int)(sumForBuy / shareDto.Price);
             var maxGosBondsCount = (int)(sumForBuy / gosBondDto.Price);
             var maxCorpBondsCount = (int)(sumForBuy / corpBondDto.Price);
+            var maxGoldCount = (int)(sumForBuy / gold.Price);
 
             int sharesStep = GetStep(maxSharesCount, stepPercent);
             var gosBondsStep = GetStep(maxGosBondsCount, stepPercent);
             var corpBondsStep = GetStep(maxCorpBondsCount, stepPercent);
+            var goldStep = GetStep(maxGoldCount, stepPercent);
 
             var buyModels = new List<BuyModel>();
 
@@ -43,30 +46,35 @@ namespace PercentCalculateConsole.Services.Implementation
                 {
                     for (int countCorpBonds = 0; countCorpBonds < maxCorpBondsCount; countCorpBonds += corpBondsStep)
                     {
-                        var sharesPrice = countShares * shareDto.Price;
-                        var gosBondsPrice = countGosBonds * gosBondDto.Price;
-                        var corpBondsPrice = countCorpBonds * corpBondDto.Price;
-                        var price = sharesPrice + gosBondsPrice + corpBondsPrice;
-
-                        if (price < sumForBuy && price > minSumForBuy)
+                        for (int countGold = 0; countGold < maxGoldCount; countGold++)
                         {
-                            var newOverallShares = shareDto.OverallSum + sharesPrice;
-                            var newOverallGosBonds = gosBondDto.OverallSum + gosBondsPrice;
-                            var newOverallCorpBonds = corpBondDto.OverallSum + corpBondsPrice;
-                            var newOverall = newOverallShares + newOverallGosBonds + newOverallCorpBonds;
+                            var sharesPrice = countShares * shareDto.Price;
+                            var gosBondsPrice = countGosBonds * gosBondDto.Price;
+                            var corpBondsPrice = countCorpBonds * corpBondDto.Price;
+                            var goldPrice = countGold * gold.Price;
+                            var price = sharesPrice + gosBondsPrice + corpBondsPrice + goldPrice;
 
-                            buyModels.Add(GetBuyModel(shareDto,
-                                gosBondDto,
-                                corpBondDto,
-                                replenishmentDto,
-                                countShares,
-                                countGosBonds,
-                                countCorpBonds,
-                                price,
-                                newOverallShares,
-                                newOverallGosBonds,
-                                newOverallCorpBonds,
-                                newOverall));
+                            if (price < sumForBuy && price > minSumForBuy)
+                            {
+                                var newOverallShares = shareDto.OverallSum + sharesPrice;
+                                var newOverallGosBonds = gosBondDto.OverallSum + gosBondsPrice;
+                                var newOverallCorpBonds = corpBondDto.OverallSum + corpBondsPrice;
+                                var newOverallGold = gold.OverallSum + goldPrice;
+                                var newOverall = newOverallShares + newOverallGosBonds + newOverallCorpBonds + newOverallGold;
+
+                                buyModels.Add(new BuyModel()
+                                {
+                                    ShareCounts = countShares,
+                                    GosBondCounts = countGosBonds,
+                                    CorpBondCounts = countCorpBonds,
+                                    GoldCounts = countGold,
+                                    SumDifference = replenishmentDto.ReplenishmentAmount + replenishmentDto.CurrentSum - price,
+                                    SharePercentDeviation = Math.Abs(shareDto.TargetPercent - newOverallShares / newOverall),
+                                    GosBondPercentDeviation = Math.Abs(gosBondDto.TargetPercent - newOverallGosBonds / newOverall),
+                                    CorpBondPercentDeviation = Math.Abs(corpBondDto.TargetPercent - newOverallCorpBonds / newOverall),
+                                    GoldPercentDeviation = Math.Abs(gold.TargetPercent - newOverallGold / newOverall),
+                                });
+                            }
                         }
                     }
                 }
@@ -81,20 +89,6 @@ namespace PercentCalculateConsole.Services.Implementation
         {
             int step = (int)(maxSharesCount * coef);
             return step > 0 ? step : 1;
-        }
-
-        private static BuyModel GetBuyModel(InstrumentCalculationModel shareDto, InstrumentCalculationModel gosBondDto, InstrumentCalculationModel corpBondDto, ReplenishmentModel replenishmentDto, int countShares, int countGosBonds, int countCorpBonds, decimal price, decimal newOverallShares, decimal newOverallGosBonds, decimal newOverallCorpBonds, decimal newOverall)
-        {
-            return new BuyModel()
-            {
-                ShareCounts = countShares,
-                GosBondCounts = countGosBonds,
-                CorpBondCounts = countCorpBonds,
-                SumDifference = replenishmentDto.ReplenishmentAmount + replenishmentDto.CurrentSum - price,
-                SharePercentDeviation = Math.Abs(shareDto.TargetPercent - newOverallShares / newOverall),
-                GosBondPercentDeviation = Math.Abs(gosBondDto.TargetPercent - newOverallGosBonds / newOverall),
-                CorpBondPercentDeviation = Math.Abs(corpBondDto.TargetPercent - newOverallCorpBonds / newOverall),
-            };
         }
     }
 }

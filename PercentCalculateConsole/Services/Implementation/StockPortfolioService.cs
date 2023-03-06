@@ -22,6 +22,7 @@ namespace PercentCalculateConsole.Services.Implementation
             stockPortfolio.Share.OverallSum += model.ShareCounts * stockPortfolio.Share.Price;
             stockPortfolio.GosBond.OverallSum += model.GosBondCounts * stockPortfolio.GosBond.Price;
             stockPortfolio.CorpBond.OverallSum += model.CorpBondCounts * stockPortfolio.CorpBond.Price;
+            stockPortfolio.Gold.OverallSum += model.GoldCounts * stockPortfolio.Gold.Price;
         }
 
         public Dictionary<string, decimal> GetStockProfilePrices(StockPortfolioCalculationModel stockPortfolio)
@@ -39,6 +40,7 @@ namespace PercentCalculateConsole.Services.Implementation
             (model.Share.Price, model.Share.OverallSum) = GetPriceAndOverall(model.Share.Ticker, model.TickerInfos, prices, model.Share.ClassType);
             (model.GosBond.Price, model.GosBond.OverallSum) = GetPriceAndOverall(model.GosBond.Ticker, model.TickerInfos, prices, model.GosBond.ClassType);
             (model.CorpBond.Price, model.CorpBond.OverallSum) = GetPriceAndOverall(model.CorpBond.Ticker, model.TickerInfos, prices, model.CorpBond.ClassType);
+            (model.Gold.Price, model.Gold.OverallSum) = GetPriceAndOverall(model.Gold.Ticker, model.TickerInfos, prices, model.Gold.ClassType);
         }
 
         private static (decimal, decimal) GetPriceAndOverall(string ticker, TickerInfo[] tickerInfos, IDictionary<string, decimal> prices,

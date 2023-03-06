@@ -8,7 +8,7 @@
 
     "Share": {
       "ClassType": 0,
-      "TargetPercent": 0.8,
+      "TargetPercent": 0.75,
       "Ticker": "SBMX",
       "TickerType": 2
     },
@@ -22,6 +22,12 @@
       "ClassType": 2,
       "TargetPercent": 0.05,
       "Ticker": "SBRB",
+      "TickerType": 2
+    },
+    "Gold": {
+      "ClassType": 3,
+      "TargetPercent": 0.05,
+      "Ticker": "SBGD",
       "TickerType": 2
     }
   }
