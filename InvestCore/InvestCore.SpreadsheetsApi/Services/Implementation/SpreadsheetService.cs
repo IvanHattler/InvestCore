@@ -25,7 +25,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             };
             var endRow = mainTableData.Count + 4;
             var endColumn = startColumn + mainTableData.Max(x => x.Count);
-            string range = GetTableRange(sheet, startRow + 1, startColumn + 1, endRow, endColumn);
+            string range = SpreadsheetHelper.GetTableRange(sheet, startRow + 1, startColumn + 1, endRow, endColumn);
 
             var updateRequest = _sheetsService.Spreadsheets.Values.Update(valueRange, spreadsheetId, range);
             updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
@@ -38,10 +38,9 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             {
                 Requests = new List<Request>
                 {
-                    //Set format to all
-                    //GetFormatAllTextRequest(startRow, startColumn, endRow, endColumn, sheetId),
                     //Merge first cell
                     GetMergeCellsRequest(startRow, startColumn, startRow + 1, endColumn, sheetId),
+
                     //Set border to first cell
                     GetUpdateBordersRequest(startRow, startColumn, startRow + 1, startColumn + 1, sheetId),
                     //Set border to second cell
@@ -50,8 +49,15 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                     GetUpdateBordersRequest(startRow + 1, startColumn, endRow - 1, endColumn, sheetId),
                     //Set border to last cells
                     GetUpdateBordersRequest(endRow - 1, startColumn + 2, endRow, endColumn, sheetId),
+
                     //Set format to first cell
                     GetFormatTextCenterRequest(startRow, startColumn, startRow + 1, startColumn + 1, sheetId),
+                    //Set format to second row
+                    GetFormatTextCenterRequest(startRow + 1, startColumn, startRow + 2, endColumn, sheetId),
+                    //Set format to all cells
+                    GetFormatAllTextRequest(startRow, startColumn, endRow, endColumn, sheetId),
+                    //Set percent format to last column
+                    GetFormatPercentRequest(startRow + 2, endColumn - 1 , endRow, endColumn, sheetId),
                 }
             }, spreadsheetId);
 
@@ -59,8 +65,44 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             _logger.LogInformation("Style applied");
         }
 
+        private static Request GetFormatPercentRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
+        {
+            var cellData = new CellData()
+            {
+                UserEnteredFormat = new CellFormat()
+                {
+                    NumberFormat = new NumberFormat
+                    {
+                        Pattern = "0.00%",
+                        Type = "NUMBER"
+                    }
+                }
+            };
+
+            return new Request()
+            {
+                UpdateCells = new UpdateCellsRequest()
+                {
+                    Fields = "userEnteredFormat.numberFormat",
+                    Range = new GridRange()
+                    {
+                        SheetId = sheetId,
+                        StartRowIndex = startRow,
+                        StartColumnIndex = startColumn,
+                        EndColumnIndex = endColumn,
+                        EndRowIndex = endRow,
+                    },
+                    Rows = SpreadsheetHelper.RepeatToList(endRow - startRow, new RowData()
+                    {
+                        Values = SpreadsheetHelper.RepeatToList(endColumn - startColumn, cellData)
+                    }),
+                }
+            };
+        }
+
         private static Request GetFormatAllTextRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
         {
+
             return new Request()
             {
                 UpdateCells = new UpdateCellsRequest()
@@ -74,26 +116,20 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                         EndColumnIndex = endColumn,
                         EndRowIndex = endRow,
                     },
-                    Rows = new List<RowData>()
+                    Rows = SpreadsheetHelper.RepeatToList(endRow - startRow, new RowData()
                     {
-                        new RowData()
+                        Values = SpreadsheetHelper.RepeatToList(endColumn - startColumn, new CellData()
                         {
-                            Values = new List<CellData>()
+                            UserEnteredFormat = new CellFormat()
                             {
-                                new CellData()
+                                TextFormat = new TextFormat()
                                 {
-                                    UserEnteredFormat = new CellFormat()
-                                    {
-                                        TextFormat = new TextFormat()
-                                        {
-                                            FontSize = 12,
-                                            FontFamily = "Arial",
-                                        }
-                                    }
+                                    FontSize = 12,
+                                    FontFamily = "Arial",
                                 }
                             }
-                        }
-                    }
+                        })
+                    }),
                 }
             };
         }
@@ -114,22 +150,16 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                         EndColumnIndex = endColumn,
                         EndRowIndex = endRow,
                     },
-                    Rows = new List<RowData>()
+                    Rows = SpreadsheetHelper.RepeatToList(endRow - startRow, new RowData()
                     {
-                        new RowData()
+                        Values = SpreadsheetHelper.RepeatToList(endColumn - startColumn, new CellData()
                         {
-                            Values = new List<CellData>()
+                            UserEnteredFormat = new CellFormat()
                             {
-                                new CellData()
-                                {
-                                    UserEnteredFormat = new CellFormat()
-                                    {
-                                        HorizontalAlignment = "CENTER",
-                                    }
-                                }
+                                HorizontalAlignment = "CENTER",
                             }
-                        }
-                    }
+                        })
+                    })
                 }
             };
         }
@@ -188,14 +218,5 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                 },
             };
         }
-
-        private string GetTableRange(string sheet, int startRow, int startColumn, int endRow, int endColumn)
-            => $"{sheet}!{GetCellName(startColumn, startRow)}:{GetCellName(endColumn, endRow)}";
-
-        private string GetCellName(int columnIndex, int rowIndex)
-            => $"{ToColumnIndex(columnIndex)}{rowIndex}";
-
-        private char ToColumnIndex(int columnIndex)
-            => (char)(columnIndex + 0x40);
     }
 }

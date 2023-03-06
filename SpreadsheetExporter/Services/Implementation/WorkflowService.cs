@@ -173,7 +173,7 @@ namespace SpreadsheetExporter.Services.Implementation
             var result = new List<IList<object>>(tickerInfos.Length + 3)
             {
                 new[] { "Общие доли портфеля" },
-                new[] { "Название", "Цена", "Количество", "Стоимость, р", "Доля" },
+                new[] { "Название", "Цена, р", "Количество", "Стоимость, р", "Доля" },
             };
 
             var prices = await _shareService.GetCurrentOrLastPricesAsync(
