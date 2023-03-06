@@ -23,6 +23,7 @@ namespace PercentCalculateConsole.Services.Implementation
             stockPortfolio.GosBond.OverallSum += model.GosBondCounts * stockPortfolio.GosBond.Price;
             stockPortfolio.CorpBond.OverallSum += model.CorpBondCounts * stockPortfolio.CorpBond.Price;
             stockPortfolio.Gold.OverallSum += model.GoldCounts * stockPortfolio.Gold.Price;
+            stockPortfolio.Replenishment.CurrentSum = model.SumDifference;
         }
 
         public Dictionary<string, decimal> GetStockProfilePrices(StockPortfolioCalculationModel stockPortfolio)

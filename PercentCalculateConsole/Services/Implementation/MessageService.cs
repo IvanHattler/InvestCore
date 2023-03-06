@@ -33,7 +33,7 @@ namespace PercentCalculateConsole.Services.Implementation
             sb.AppendLine(GetPricesTable(stockPortfolio, stockPortfolioPrices));
             sb.AppendLine(GetOverallMessage(stockPortfolio));
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 12; i++)
             {
                 sb.AppendLine($"--------------------------Месяц №{i + 1}--------------------------");
                 sb.AppendLine($"Инструменты для покупки: акции {stockPortfolio.Share.Ticker}, " +
