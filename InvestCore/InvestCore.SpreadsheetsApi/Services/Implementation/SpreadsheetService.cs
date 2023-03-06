@@ -1,37 +1,62 @@
 ﻿using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
-using InvestCore.Domain.Models;
-using InvestCore.Domain.Services.Interfaces;
 using InvestCore.SpreadsheetsApi.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using SpreadsheetExporter.Domain;
-using SpreadsheetExporter.Services.Interfaces;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
-namespace SpreadsheetExporter.Services.Implementation
+namespace InvestCore.SpreadsheetsApi.Services.Implementation
 {
-    public class WorkflowService : IWorkflowService
+    public class SpreadsheetService : ISpreadsheetService
     {
-        private readonly IShareService _shareService;
-        private readonly ISpreadsheetService _spreadsheetService;
+        private readonly SheetsService _sheetsService;
         private readonly ILogger _logger;
 
-        public WorkflowService(IShareService shareService, ISpreadsheetService spreadsheetService, ILogger logger)
+        public SpreadsheetService(SheetsService sheetsService, ILogger logger)
         {
-            _shareService = shareService;
-            _spreadsheetService = spreadsheetService;
+            _sheetsService = sheetsService;
             _logger = logger;
         }
 
-        public async Task UpdateAsync(TickerInfoWithCount[] tickerInfos, SpreadsheetConfig spreadsheetConfig)
+        public async Task SendMainTableAsync(List<IList<object>> mainTableData, int startRow, int startColumn, string sheet, string spreadsheetId)
         {
-            var startRow = 4;
-            var startColumn = 1;
+            var valueRange = new ValueRange
+            {
+                Values = mainTableData
+            };
+            var endRow = mainTableData.Count + 4;
+            var endColumn = startColumn + mainTableData.Max(x => x.Count);
+            string range = GetTableRange(sheet, startRow + 1, startColumn + 1, endRow, endColumn);
 
-            var mainTableData = await GetMainTableAsync(tickerInfos, startColumn + 1, startRow + 1);
+            var updateRequest = _sheetsService.Spreadsheets.Values.Update(valueRange, spreadsheetId, range);
+            updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
 
-            await _spreadsheetService.SendMainTableAsync(mainTableData, startRow, startColumn, spreadsheetConfig.Sheet,
-                spreadsheetConfig.SpreadsheetId);
+            var updateResponse = await updateRequest.ExecuteAsync();
+            _logger.LogInformation("Updated cells in range: {range}", range);
+
+            var sheetId = 0;
+            var batchRequest = _sheetsService.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
+            {
+                Requests = new List<Request>
+                {
+                    //Set format to all
+                    //GetFormatAllTextRequest(startRow, startColumn, endRow, endColumn, sheetId),
+                    //Merge first cell
+                    GetMergeCellsRequest(startRow, startColumn, startRow + 1, endColumn, sheetId),
+                    //Set border to first cell
+                    GetUpdateBordersRequest(startRow, startColumn, startRow + 1, startColumn + 1, sheetId),
+                    //Set border to second cell
+                    GetUpdateBordersRequest(startRow + 1, startColumn, startRow + 2, endColumn, sheetId),
+                    //Set border to table
+                    GetUpdateBordersRequest(startRow + 1, startColumn, endRow - 1, endColumn, sheetId),
+                    //Set border to last cells
+                    GetUpdateBordersRequest(endRow - 1, startColumn + 2, endRow, endColumn, sheetId),
+                    //Set format to first cell
+                    GetFormatTextCenterRequest(startRow, startColumn, startRow + 1, startColumn + 1, sheetId),
+                }
+            }, spreadsheetId);
+
+            var batchResponce = await batchRequest.ExecuteAsync();
+            _logger.LogInformation("Style applied");
         }
 
         private static Request GetFormatAllTextRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
@@ -164,49 +189,8 @@ namespace SpreadsheetExporter.Services.Implementation
             };
         }
 
-        private string GetTableRange(SpreadsheetConfig spreadsheetConfig, int startRow, int startColumn, int endRow, int endColumn)
-            => $"{spreadsheetConfig.Sheet}!{GetCellName(startColumn, startRow)}:{GetCellName(endColumn, endRow)}";
-
-        public async Task<List<IList<object>>> GetMainTableAsync(TickerInfoWithCount[] tickerInfos,
-            int firstColumnIndex, int firstRowIndex)
-        {
-            var result = new List<IList<object>>(tickerInfos.Length + 3)
-            {
-                new[] { "Общие доли портфеля" },
-                new[] { "Название", "Цена", "Количество", "Стоимость, р", "Доля" },
-            };
-
-            var prices = await _shareService.GetCurrentOrLastPricesAsync(
-                tickerInfos.Select(x => (x.Ticker, x.TickerType)));
-
-            var currentRowIndex = firstRowIndex + 1;
-            var len = tickerInfos.Length + 2;
-            var sumCellName = GetCellName(firstColumnIndex + 3, len + firstRowIndex);
-            foreach (var tickerInfo in tickerInfos)
-            {
-                currentRowIndex++;
-
-                result.Add(new object[]
-                {
-                    tickerInfo.Ticker,
-                    prices[tickerInfo.Ticker],
-                    tickerInfo.Count.ToString(),
-                    $"={GetCellName(firstColumnIndex + 1,currentRowIndex)}*{GetCellName(firstColumnIndex + 2, currentRowIndex)}",
-                    $"={GetCellName(firstColumnIndex + 3, currentRowIndex)}/{sumCellName}"
-                });
-            }
-
-            result.Add(new string[]
-            {
-                "",
-                "",
-                "Итого:",
-                $"=SUM({GetCellName(firstColumnIndex + 3, firstRowIndex + 2)}:{GetCellName(firstColumnIndex + 3, currentRowIndex)})",
-                $"=SUM({GetCellName(firstColumnIndex + 4, firstRowIndex + 2)}:{GetCellName(firstColumnIndex + 4, currentRowIndex)})"
-            });
-
-            return result;
-        }
+        private string GetTableRange(string sheet, int startRow, int startColumn, int endRow, int endColumn)
+            => $"{sheet}!{GetCellName(startColumn, startRow)}:{GetCellName(endColumn, endRow)}";
 
         private string GetCellName(int columnIndex, int rowIndex)
             => $"{ToColumnIndex(columnIndex)}{rowIndex}";

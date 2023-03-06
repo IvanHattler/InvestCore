@@ -11,12 +11,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\configs\ticker-infos.json" Link="ticker-infos.json">
+    <None Include="..\configs\ticker-infos.json" Link="ticker-infos.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\configs\tinkoff-token.json" Link="tinkoff-token.json">
+    </None>
+    <None Include="..\configs\tinkoff-token.json" Link="tinkoff-token.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

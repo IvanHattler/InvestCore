@@ -5,6 +5,8 @@ using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using InvestCore.Domain.Services.Implementation;
 using InvestCore.Domain.Services.Interfaces;
+using InvestCore.SpreadsheetsApi.Services.Implementation;
+using InvestCore.SpreadsheetsApi.Services.Interfaces;
 using InvestCore.TinkoffApi.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -60,6 +62,7 @@ namespace PercentCalculateConsole.IoC
                     ApplicationName = spreadsheetConfig.ApplicationName,
                 });
             }).SingleInstance();
+            builder.RegisterType<SpreadsheetService>().SingleInstance().As<ISpreadsheetService>();
 
             #endregion Services
 

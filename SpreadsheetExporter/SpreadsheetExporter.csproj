@@ -5,19 +5,21 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+	<PublishSingleFile Condition="'$(Configuration)' == 'Release'">true</PublishSingleFile>
+	<PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\configs\ticker-infos.json" Link="ticker-infos.json">
+    <None Include="..\configs\ticker-infos.json" Link="ticker-infos.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\configs\tinkoff-token.json" Link="tinkoff-token.json">
+    </None>
+    <None Include="..\configs\tinkoff-token.json" Link="tinkoff-token.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Apis.Sheets.v4" Version="1.60.0.2979" />
 	<PackageReference Include="Autofac" Version="6.5.0" />
 	<PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
 	<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
@@ -26,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\InvestCore\InvestCore.SpreadsheetsApi\InvestCore.SpreadsheetsApi.csproj" />
     <ProjectReference Include="..\InvestCore\InvestCore.TinkoffApi\InvestCore.TinkoffApi.csproj" />
   </ItemGroup>
 

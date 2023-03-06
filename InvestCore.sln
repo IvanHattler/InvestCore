@@ -30,7 +30,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatBotWorker", "ChatBot\Ch
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{F9A8B1C5-B5CA-45F3-8E6F-C06C687301E2}"
 	ProjectSection(SolutionItems) = preProject
-		InvestCoreCodeMap.dgml = InvestCoreCodeMap.dgml
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
 	EndProjectSection
@@ -40,6 +39,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configs", "configs", "{07DD
 		configs\tinkoff-token.json = configs\tinkoff-token.json
 		configs\ticker-infos.json = configs\ticker-infos.json
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvestCore.SpreadsheetsApi", "InvestCore\InvestCore.SpreadsheetsApi\InvestCore.SpreadsheetsApi.csproj", "{A6F52E2E-193B-4D00-A6C2-179E807B5FD9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,6 +84,10 @@ Global
 		{5B332C74-66B3-4AA3-8F1E-FD569509BB54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B332C74-66B3-4AA3-8F1E-FD569509BB54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B332C74-66B3-4AA3-8F1E-FD569509BB54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6F52E2E-193B-4D00-A6C2-179E807B5FD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6F52E2E-193B-4D00-A6C2-179E807B5FD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6F52E2E-193B-4D00-A6C2-179E807B5FD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6F52E2E-193B-4D00-A6C2-179E807B5FD9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -95,6 +100,7 @@ Global
 		{14055AC5-9618-4079-93C5-30ED02DEAE63} = {8E1B4E35-7B96-4A01-B76F-438DC4DF0E6B}
 		{B9EB9A35-34D5-4BE0-B6BD-345B19131D7B} = {8E1B4E35-7B96-4A01-B76F-438DC4DF0E6B}
 		{5B332C74-66B3-4AA3-8F1E-FD569509BB54} = {8E1B4E35-7B96-4A01-B76F-438DC4DF0E6B}
+		{A6F52E2E-193B-4D00-A6C2-179E807B5FD9} = {44C25151-0E92-4EC3-A848-FC524CAE0582}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B90F36B7-7432-4BD3-8528-9D2C52631AD4}
