@@ -179,6 +179,21 @@ namespace SpreadsheetExporter.Services.Implementation
             var prices = await _shareService.GetCurrentOrLastPricesAsync(
                 tickerInfos.Select(x => (x.Ticker, x.TickerType)));
 
+            if (prices.Count < tickerInfos.Count())
+            {
+                var defaultPrices = tickerInfos
+                    .Where(x => x.DefaultPrice.HasValue)
+                    .ToDictionary(x => x.Ticker, x => x.DefaultPrice.Value);
+                foreach (var tickerInfo in tickerInfos.Where(x => !prices.ContainsKey(x.Ticker)))
+                {
+                    if (defaultPrices.ContainsKey(tickerInfo.Ticker))
+                    {
+                        prices.TryAdd(tickerInfo.Ticker, defaultPrices[tickerInfo.Ticker]);
+                        _logger.LogWarning("Used default price for {symbol}", tickerInfo.Ticker);
+                    }
+                }
+            }
+
             var currentRowIndex = firstRowIndex + 1;
             var len = tickerInfos.Length + 2;
             var sumCellName = GetCellName(firstColumnIndex + 3, len + firstRowIndex);
