@@ -28,12 +28,29 @@ namespace PercentCalculateConsole.Services.Implementation
 
         public Dictionary<string, decimal> GetStockProfilePrices(StockPortfolioCalculationModel stockPortfolio)
         {
-            return _shareService
-                .GetCurrentOrLastPricesAsync(stockPortfolio
+            var tickers = stockPortfolio
                     .GetTickersForBuy()
                     .Union(stockPortfolio.TickerInfos
-                        .Select(x => (x.Ticker, x.TickerType))))
+                        .Select(x => (x.Ticker, x.TickerType)));
+
+            var prices = _shareService
+                .GetCurrentOrLastPricesAsync(tickers)
                 .Result;
+
+            if (prices.Count < tickers.Count())
+            {
+                var defaultPrices = stockPortfolio.GetDefaultPrices();
+                foreach (var (ticker, _) in tickers.Where(x => !prices.ContainsKey(x.Item1)))
+                {
+                    if (defaultPrices.ContainsKey(ticker))
+                    {
+                        prices.TryAdd(ticker, defaultPrices[ticker]);
+                        _logger.LogWarning("Used default price for {symbol}", ticker);
+                    }
+                }
+            }
+
+            return prices;
         }
 
         public void LoadPricesToModel(StockPortfolioCalculationModel model, IDictionary<string, decimal> prices)

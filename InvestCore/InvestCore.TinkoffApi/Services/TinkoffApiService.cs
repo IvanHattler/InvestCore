@@ -13,10 +13,6 @@ namespace InvestCore.TinkoffApi.Services
     {
         private readonly InvestApiClient _investApiClient;
         private readonly ILogger _logger;
-        private readonly Dictionary<string, decimal> _defaultPrices = new Dictionary<string, decimal>()
-        {
-            { "SBGD", 13.69m },
-        };
 
         public TinkoffApiService(InvestApiClient investApiClient, ILogger logger)
         {
@@ -79,18 +75,6 @@ namespace InvestCore.TinkoffApi.Services
                     if (e.StatusCode == StatusCode.NotFound)
                     {
                         _logger.LogCritical("Ticker not found");
-                    }
-                }
-            }
-
-            if (result.Count < symbols.Count())
-            {
-                foreach (var (symbol, _) in symbols.Where(x => !result.ContainsKey(x.Item1)))
-                {
-                    if (_defaultPrices.ContainsKey(symbol))
-                    {
-                        result.TryAdd(symbol, _defaultPrices[symbol]);
-                        _logger.LogWarning("Used default price for {symbol}", symbol);
                     }
                 }
             }

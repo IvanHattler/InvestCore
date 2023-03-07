@@ -8,13 +8,13 @@
 
     "Share": {
       "ClassType": 0,
-      "TargetPercent": 0.75,
+      "TargetPercent": 0.70,
       "Ticker": "SBMX",
       "TickerType": 2
     },
     "GosBond": {
       "ClassType": 1,
-      "TargetPercent": 0.15,
+      "TargetPercent": 0.2,
       "Ticker": "SBGB",
       "TickerType": 2
     },
@@ -28,7 +28,8 @@
       "ClassType": 3,
       "TargetPercent": 0.05,
       "Ticker": "SBGD",
-      "TickerType": 2
+      "TickerType": 2,
+      "DefaultPrice": 13.71
     }
   }
 }
