@@ -1,9 +1,7 @@
-﻿using Google.Apis.Sheets.v4;
-using Google.Apis.Sheets.v4.Data;
-using InvestCore.Domain.Models;
+﻿using InvestCore.Domain.Models;
 using InvestCore.Domain.Services.Interfaces;
+using InvestCore.SpreadsheetsApi;
 using InvestCore.SpreadsheetsApi.Services.Interfaces;
-using Microsoft.Extensions.Logging;
 using SpreadsheetExporter.Domain;
 using SpreadsheetExporter.Services.Interfaces;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
@@ -23,7 +21,7 @@ namespace SpreadsheetExporter.Services.Implementation
             _logger = logger;
         }
 
-        public async Task UpdateAsync(TickerInfoWithCount[] tickerInfos, SpreadsheetConfig spreadsheetConfig)
+        public async Task UpdateTableAsync(TickerInfoWithCount[] tickerInfos, SpreadsheetConfig spreadsheetConfig)
         {
             var startRow = 4;
             var startColumn = 1;
@@ -34,139 +32,6 @@ namespace SpreadsheetExporter.Services.Implementation
                 spreadsheetConfig.SpreadsheetId);
         }
 
-        private static Request GetFormatAllTextRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
-        {
-            return new Request()
-            {
-                UpdateCells = new UpdateCellsRequest()
-                {
-                    Fields = "userEnteredFormat.textFormat",
-                    Range = new GridRange()
-                    {
-                        SheetId = sheetId,
-                        StartRowIndex = startRow,
-                        StartColumnIndex = startColumn,
-                        EndColumnIndex = endColumn,
-                        EndRowIndex = endRow,
-                    },
-                    Rows = new List<RowData>()
-                    {
-                        new RowData()
-                        {
-                            Values = new List<CellData>()
-                            {
-                                new CellData()
-                                {
-                                    UserEnteredFormat = new CellFormat()
-                                    {
-                                        TextFormat = new TextFormat()
-                                        {
-                                            FontSize = 12,
-                                            FontFamily = "Arial",
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-        }
-
-        private static Request GetFormatTextCenterRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
-        {
-            return new Request()
-            {
-                UpdateCells = new UpdateCellsRequest()
-                {
-                    Fields = "userEnteredFormat.horizontalAlignment",
-
-                    Range = new GridRange()
-                    {
-                        SheetId = sheetId,
-                        StartRowIndex = startRow,
-                        StartColumnIndex = startColumn,
-                        EndColumnIndex = endColumn,
-                        EndRowIndex = endRow,
-                    },
-                    Rows = new List<RowData>()
-                    {
-                        new RowData()
-                        {
-                            Values = new List<CellData>()
-                            {
-                                new CellData()
-                                {
-                                    UserEnteredFormat = new CellFormat()
-                                    {
-                                        HorizontalAlignment = "CENTER",
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-        }
-
-        private static Request GetMergeCellsRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
-        {
-            return new Request()
-            {
-                MergeCells = new MergeCellsRequest()
-                {
-                    MergeType = "MERGE_ALL",
-                    Range = new GridRange()
-                    {
-                        SheetId = sheetId,
-                        StartRowIndex = startRow,
-                        StartColumnIndex = startColumn,
-                        EndRowIndex = endRow,
-                        EndColumnIndex = endColumn
-                    }
-                }
-            };
-        }
-
-        private static Request GetUpdateBordersRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
-        {
-            var blackColor = new Color()
-            {
-                Red = 0,
-                Green = 0,
-                Blue = 0,
-                Alpha = 1
-            };
-            var border = new Border()
-            {
-                Color = blackColor,
-                Style = "SOLID",
-                Width = 1
-            };
-            return new Request()
-            {
-                UpdateBorders = new UpdateBordersRequest()
-                {
-                    Range = new GridRange()
-                    {
-                        SheetId = sheetId,
-                        StartRowIndex = startRow,
-                        StartColumnIndex = startColumn,
-                        EndRowIndex = endRow,
-                        EndColumnIndex = endColumn
-                    },
-                    Top = border,
-                    Bottom = border,
-                    Left = border,
-                    Right = border,
-                    InnerVertical = border,
-                },
-            };
-        }
-
-        private string GetTableRange(SpreadsheetConfig spreadsheetConfig, int startRow, int startColumn, int endRow, int endColumn)
-            => $"{spreadsheetConfig.Sheet}!{GetCellName(startColumn, startRow)}:{GetCellName(endColumn, endRow)}";
-
         public async Task<List<IList<object>>> GetMainTableAsync(TickerInfoWithCount[] tickerInfos,
             int firstColumnIndex, int firstRowIndex)
         {
@@ -176,27 +41,11 @@ namespace SpreadsheetExporter.Services.Implementation
                 new[] { "Название", "Цена, р", "Количество", "Стоимость, р", "Доля" },
             };
 
-            var prices = await _shareService.GetCurrentOrLastPricesAsync(
-                tickerInfos.Select(x => (x.Ticker, x.TickerType)));
-
-            if (prices.Count < tickerInfos.Count())
-            {
-                var defaultPrices = tickerInfos
-                    .Where(x => x.DefaultPrice.HasValue)
-                    .ToDictionary(x => x.Ticker, x => x.DefaultPrice.Value);
-                foreach (var tickerInfo in tickerInfos.Where(x => !prices.ContainsKey(x.Ticker)))
-                {
-                    if (defaultPrices.ContainsKey(tickerInfo.Ticker))
-                    {
-                        prices.TryAdd(tickerInfo.Ticker, defaultPrices[tickerInfo.Ticker]);
-                        _logger.LogWarning("Used default price for {symbol}", tickerInfo.Ticker);
-                    }
-                }
-            }
+            var prices = await _shareService.GetCurrentOrLastPricesAsync(tickerInfos);
 
             var currentRowIndex = firstRowIndex + 1;
             var len = tickerInfos.Length + 2;
-            var sumCellName = GetCellName(firstColumnIndex + 3, len + firstRowIndex);
+            var sumCellName = SpreadsheetHelper.GetCellName(firstColumnIndex + 3, len + firstRowIndex);
             foreach (var tickerInfo in tickerInfos)
             {
                 currentRowIndex++;
@@ -206,8 +55,8 @@ namespace SpreadsheetExporter.Services.Implementation
                     tickerInfo.Ticker,
                     prices[tickerInfo.Ticker],
                     tickerInfo.Count.ToString(),
-                    $"={GetCellName(firstColumnIndex + 1,currentRowIndex)}*{GetCellName(firstColumnIndex + 2, currentRowIndex)}",
-                    $"={GetCellName(firstColumnIndex + 3, currentRowIndex)}/{sumCellName}"
+                    $"={SpreadsheetHelper.GetCellName(firstColumnIndex + 1,currentRowIndex)}*{SpreadsheetHelper.GetCellName(firstColumnIndex + 2, currentRowIndex)}",
+                    $"={SpreadsheetHelper.GetCellName(firstColumnIndex + 3, currentRowIndex)}/{sumCellName}"
                 });
             }
 
@@ -216,17 +65,11 @@ namespace SpreadsheetExporter.Services.Implementation
                 "",
                 "",
                 "Итого:",
-                $"=SUM({GetCellName(firstColumnIndex + 3, firstRowIndex + 2)}:{GetCellName(firstColumnIndex + 3, currentRowIndex)})",
-                $"=SUM({GetCellName(firstColumnIndex + 4, firstRowIndex + 2)}:{GetCellName(firstColumnIndex + 4, currentRowIndex)})"
+                $"=SUM({SpreadsheetHelper.GetCellName(firstColumnIndex + 3, firstRowIndex + 2)}:{SpreadsheetHelper.GetCellName(firstColumnIndex + 3, currentRowIndex)})",
+                $"=SUM({SpreadsheetHelper.GetCellName(firstColumnIndex + 4, firstRowIndex + 2)}:{SpreadsheetHelper.GetCellName(firstColumnIndex + 4, currentRowIndex)})"
             });
 
             return result;
         }
-
-        private string GetCellName(int columnIndex, int rowIndex)
-            => $"{ToColumnIndex(columnIndex)}{rowIndex}";
-
-        private char ToColumnIndex(int columnIndex)
-            => (char)(columnIndex + 0x40);
     }
 }

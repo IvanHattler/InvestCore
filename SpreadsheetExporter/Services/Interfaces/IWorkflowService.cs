@@ -5,6 +5,6 @@ namespace SpreadsheetExporter.Services.Interfaces
 {
     public interface IWorkflowService
     {
-        Task UpdateAsync(TickerInfoWithCount[] tickerInfos, SpreadsheetConfig spreadsheetConfig);
+        Task UpdateTableAsync(TickerInfoWithCount[] tickerInfos, SpreadsheetConfig spreadsheetConfig);
     }
 }

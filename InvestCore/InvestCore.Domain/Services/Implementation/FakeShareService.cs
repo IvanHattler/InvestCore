@@ -5,9 +5,10 @@ namespace InvestCore.Domain.Services.Implementation
 {
     public class FakeShareService : IShareService
     {
-        public Task<Dictionary<string, decimal>> GetCurrentOrLastPricesAsync(IEnumerable<(string, InstrumentType)> symbols)
+        public Task<Dictionary<string, decimal>> GetCurrentOrLastPricesAsync(IEnumerable<TickerInfoBase> symbols)
         {
-            return GetPricesAsync(symbols);
+            return GetPricesAsync(
+                symbols.Select(x => (x.Ticker, x.TickerType)));
         }
 
         public Task<Dictionary<string, decimal>> GetPricesAsync(IEnumerable<(string, InstrumentType)> symbols)

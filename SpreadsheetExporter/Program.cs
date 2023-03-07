@@ -16,4 +16,4 @@ var tickerInfos = configuration.GetRequiredSection("TickerInfos").Get<TickerInfo
 
 var workflowService = container.Resolve<IWorkflowService>();
 
-await workflowService.UpdateAsync(tickerInfos, spreadsheetConfig);
+await workflowService.UpdateTableAsync(tickerInfos, spreadsheetConfig);

@@ -1,5 +1,7 @@
-﻿using Google.Protobuf.WellKnownTypes;
+﻿using System.Diagnostics;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using InvestCore.Domain.Models;
 using InvestCore.Domain.Services.Interfaces;
 using InvestCore.TinkoffApi.Domain;
 using Microsoft.Extensions.Logging;
@@ -50,10 +52,10 @@ namespace InvestCore.TinkoffApi.Services
             return result;
         }
 
-        public async Task<Dictionary<string, decimal>> GetCurrentOrLastPricesAsync(IEnumerable<(string, InstrumentType)> symbols)
+        public async Task<Dictionary<string, decimal>> GetCurrentOrLastPricesAsync(IEnumerable<TickerInfoBase> tickerInfos)
         {
-            var result = new Dictionary<string, decimal>(symbols.Count());
-            var symbolModels = await GetSymbolModels(symbols);
+            var result = new Dictionary<string, decimal>(tickerInfos.Count());
+            var symbolModels = await GetSymbolModels(tickerInfos);
 
             foreach (var symbolModel in symbolModels)
             {
@@ -79,22 +81,43 @@ namespace InvestCore.TinkoffApi.Services
                 }
             }
 
+            FillDefaultValues(tickerInfos, result);
+
             return result;
         }
 
-        private async Task<IEnumerable<SymbolModel>> GetSymbolModels(IEnumerable<(string, InstrumentType)> symbols)
+        private void FillDefaultValues(IEnumerable<TickerInfoBase> tickerInfos, Dictionary<string, decimal> result)
+        {
+            if (result.Count < tickerInfos.Count())
+            {
+                var defaultPrices = tickerInfos
+                    .Where(x => x.DefaultPrice.HasValue)
+                    .ToDictionary(x => x.Ticker, x => x.DefaultPrice.Value);
+
+                foreach (var tickerInfo in tickerInfos.Where(x => !result.ContainsKey(x.Ticker)))
+                {
+                    if (defaultPrices.ContainsKey(tickerInfo.Ticker))
+                    {
+                        result.TryAdd(tickerInfo.Ticker, defaultPrices[tickerInfo.Ticker]);
+                        _logger.LogWarning("Used default price for {symbol}", tickerInfo.Ticker);
+                    }
+                }
+            }
+        }
+
+        private async Task<IEnumerable<SymbolModel>> GetSymbolModels(IEnumerable<TickerInfoBase> tickerInfos)
         {
             var res = new List<SymbolModel>();
 
-            foreach (var (symbol, type) in symbols)
+            foreach (var tickerInfo in tickerInfos)
             {
                 try
                 {
-                    var figiAndNominal = await GetFigiAndNominal(symbol, type);
+                    var figiAndNominal = await GetFigiAndNominal(tickerInfo.Ticker, tickerInfo.TickerType);
                     res.Add(new SymbolModel()
                     {
-                        Symbol = symbol,
-                        Type = type,
+                        Symbol = tickerInfo.Ticker,
+                        Type = tickerInfo.TickerType,
                         Figi = figiAndNominal.Item1,
                         Nominal = figiAndNominal.Item2,
                     });
