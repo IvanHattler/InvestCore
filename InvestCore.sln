@@ -36,11 +36,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решен
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configs", "configs", "{07DD986F-E385-43C2-92B2-F0927A22A419}"
 	ProjectSection(SolutionItems) = preProject
-		configs\tinkoff-token.json = configs\tinkoff-token.json
 		configs\ticker-infos.json = configs\ticker-infos.json
+		configs\tinkoff-token.json = configs\tinkoff-token.json
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvestCore.SpreadsheetsApi", "InvestCore\InvestCore.SpreadsheetsApi\InvestCore.SpreadsheetsApi.csproj", "{A6F52E2E-193B-4D00-A6C2-179E807B5FD9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvestCore.SpreadsheetsApi", "InvestCore\InvestCore.SpreadsheetsApi\InvestCore.SpreadsheetsApi.csproj", "{A6F52E2E-193B-4D00-A6C2-179E807B5FD9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

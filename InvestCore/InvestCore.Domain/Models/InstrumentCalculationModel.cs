@@ -1,6 +1,4 @@
-﻿using InvestCore.Domain.Models;
-
-namespace PercentCalculateConsole.Domain
+﻿namespace InvestCore.Domain.Models
 {
     public class InstrumentCalculationModel : TickerInfoBase
     {

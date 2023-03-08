@@ -1,4 +1,5 @@
-﻿using InvestCore.Domain.Services.Interfaces;
+﻿using InvestCore.Domain.Models;
+using InvestCore.Domain.Services.Interfaces;
 using InvestCore.PercentCalculateConsole.Domain;
 using Microsoft.Extensions.Logging;
 using PercentCalculateConsole.Domain;

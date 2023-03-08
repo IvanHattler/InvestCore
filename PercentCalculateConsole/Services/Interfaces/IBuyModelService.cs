@@ -1,4 +1,5 @@
-﻿using PercentCalculateConsole.Domain;
+﻿using InvestCore.Domain.Models;
+using PercentCalculateConsole.Domain;
 
 namespace PercentCalculateConsole.Services.Interfaces
 {
