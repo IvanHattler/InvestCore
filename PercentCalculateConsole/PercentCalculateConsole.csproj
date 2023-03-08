@@ -11,10 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\configs\ticker-infos.json" Link="ticker-infos.json">
+    <None Include="..\configs\ticker-infos.json" Link="configs\ticker-infos.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\configs\tinkoff-token.json" Link="tinkoff-token.json">
+    <None Include="..\configs\tinkoff-token.json" Link="configs\tinkoff-token.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="config.json">
+    <None Update="configs\config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
