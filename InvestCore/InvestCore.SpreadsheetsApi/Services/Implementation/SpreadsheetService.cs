@@ -1,4 +1,5 @@
-﻿using Google.Apis.Sheets.v4;
+﻿using System;
+using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using InvestCore.SpreadsheetsApi.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -30,7 +31,9 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             {
                 Requests = new List<Request>
                 {
+                    //Move all sheet down
                     GetMoveAllSheetDownRequest(endRow + 2, sheetId),
+                    //Print horizontal separator line
                     GetSeparatorRequest(endRow + 2, sheetId),
 
                     //Merge first cell
@@ -54,14 +57,99 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                     //Set percent format to last column
                     GetFormatPercentRequest(startRow + 2, endColumn - 1 , endRow, endColumn, sheetId),
 
+                    //Add conditional percent formatting
                     GetConditionalFormattingRequest(startRow + 2, endColumn - 1, endRow - 1, endColumn, sheetId),
                 }
             }, spreadsheetId);
 
             await batchRequest.ExecuteAsync();
-            _logger.LogInformation("Style applied");
+            _logger.LogInformation("Main table style applied");
 
             await SetTableValues(mainTableData, startRow, startColumn, sheet, spreadsheetId, endRow, endColumn);
+        }
+
+        //private static Request GetChartRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
+        //{
+        //    return new Request()
+        //    {
+        //        AddChart = new AddChartRequest()
+        //        {
+        //            Chart = new EmbeddedChart()
+        //            {
+        //                Spec = new ChartSpec()
+        //                {
+        //                    AltText = "Доли портфеля",
+        //                    BackgroundColorStyle = new ColorStyle()
+        //                    {
+        //                        RgbColor = SpreadsheetHelper.White,
+        //                    },
+        //                    Title = "Доли портфеля",
+        //                    PieChart = new PieChartSpec()
+        //                    {
+        //                        PieHole = 0,
+        //                        LegendPosition = "TOP_LEGEND",
+        //                        ThreeDimensional = false,
+
+        //                    }
+        //                },
+        //                Position = new EmbeddedObjectPosition()
+        //                {
+        //                    SheetId = sheetId,
+        //                    NewSheet = false,
+        //                    OverlayPosition = new OverlayPosition()
+        //                    {
+        //                        AnchorCell = new GridCoordinate()
+        //                        {
+        //                            SheetId = sheetId,
+        //                            RowIndex = startRow,
+        //                            ColumnIndex = startColumn,
+        //                        },
+        //                        WidthPixels = 500,
+        //                        HeightPixels = 350,
+        //                    }
+        //                },
+        //                Border = new EmbeddedObjectBorder()
+        //                {
+        //                    ColorStyle = new ColorStyle()
+        //                    {
+        //                        RgbColor = SpreadsheetHelper.Black,
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    };
+        //}
+
+        public async Task SendCurrentDate(DateTime dateTime, int row, int column, string sheet, string spreadsheetId)
+        {
+            var sheetId = 0;
+            var batchRequest = _sheetsService.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
+            {
+                Requests = new List<Request>
+                {
+                    GetFormatAllTextRequest(row - 1, column - 1, row, column, sheetId),
+                    GetFormatTextCenterRequest(row - 1, column - 1, row, column, sheetId),
+                }
+            }, spreadsheetId);
+
+            await batchRequest.ExecuteAsync();
+            _logger.LogInformation("Current date style applied");
+
+
+            var valueRange = new ValueRange
+            {
+                Values = new List<IList<object>>
+                {
+                    new[] { $"{dateTime:d}" }
+                },
+            };
+
+            string range = SpreadsheetHelper.GetTableRange(sheet, row, column, row + 1, column + 1);
+            var updateRequest = _sheetsService.Spreadsheets.Values.Update(valueRange, spreadsheetId, range);
+            updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+
+            await updateRequest.ExecuteAsync();
+            _logger.LogInformation("Send current date  value to range: {range}", range);
         }
 
         private async Task SetTableValues(List<IList<object>> mainTableData, int startRow, int startColumn, string sheet, string spreadsheetId, int endRow, int endColumn)
@@ -76,9 +164,8 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
 
             await updateRequest.ExecuteAsync();
-            _logger.LogInformation("Updated cells in range: {range}", range);
+            _logger.LogInformation("Send main table values to range: {range}", range);
         }
-
 
         private static Request GetConditionalFormattingRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
         {

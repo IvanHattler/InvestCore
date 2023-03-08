@@ -31,6 +31,14 @@ namespace InvestCore.SpreadsheetsApi
         public static char ToColumnIndex(int columnIndex)
             => (char)(columnIndex + 0x40);
 
+        public static Color White = new()
+        {
+            Red = 1,
+            Green = 1,
+            Blue = 1,
+            Alpha = 1
+        };
+
         public static Color Black = new()
         {
             Red = 0,

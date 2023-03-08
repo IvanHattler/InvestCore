@@ -30,6 +30,8 @@ namespace SpreadsheetExporter.Services.Implementation
 
             await _spreadsheetService.SendMainTableAsync(mainTableData, startRow, startColumn, spreadsheetConfig.Sheet,
                 spreadsheetConfig.SpreadsheetId);
+
+            await _spreadsheetService.SendCurrentDate(DateTime.Now, 3, 1, spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
         }
 
         public async Task<List<IList<object>>> GetMainTableAsync(TickerInfoWithCount[] tickerInfos,
