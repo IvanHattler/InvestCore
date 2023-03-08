@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Google.Apis.Sheets.v4.Data;
 
 namespace InvestCore.SpreadsheetsApi
 {
@@ -29,5 +30,44 @@ namespace InvestCore.SpreadsheetsApi
 
         public static char ToColumnIndex(int columnIndex)
             => (char)(columnIndex + 0x40);
+
+        public static Color Black = new()
+        {
+            Red = 0,
+            Green = 0,
+            Blue = 0,
+            Alpha = 1
+        };
+
+        public static Color Green = new()
+        {
+            Red = 87f / 255,
+            Green = 187f / 255,
+            Blue = 138f / 255,
+            Alpha = 1
+        };
+
+        public static Color Yellow = new()
+        {
+            Red = 1,
+            Green = 1,
+            Blue = 0,
+            Alpha = 1
+        };
+
+        public static Color Red = new()
+        {
+            Red = 1,
+            Green = 0,
+            Blue = 0,
+            Alpha = 1
+        };
+
+        public static Border Border = new()
+        {
+            Color = Black,
+            Style = "SOLID",
+            Width = 1
+        };
     }
 }
