@@ -5,12 +5,12 @@ namespace InvestCore.PercentCalculateConsole.Domain
 {
     public class StockPortfolioCalculationModel
     {
-        public ReplenishmentModel Replenishment { get; set; }
-        public InstrumentCalculationModel Share { get; set; }
-        public InstrumentCalculationModel GosBond { get; set; }
-        public InstrumentCalculationModel CorpBond { get; set; }
-        public InstrumentCalculationModel Gold { get; set; }
-        public TickerInfo[] TickerInfos { get; set; }
+        public ReplenishmentModel Replenishment { get; set; } = new();
+        public InstrumentCalculationModel Share { get; set; } = new();
+        public InstrumentCalculationModel GosBond { get; set; } = new();
+        public InstrumentCalculationModel CorpBond { get; set; } = new();
+        public InstrumentCalculationModel Gold { get; set; } = new();
+        public TickerInfo[] TickerInfos { get; set; } = Array.Empty<TickerInfo>();
 
         public IEnumerable<TickerInfoBase> GetAllTickerInfos()
             => TickerInfos

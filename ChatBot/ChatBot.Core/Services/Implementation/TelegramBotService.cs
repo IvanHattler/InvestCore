@@ -11,7 +11,7 @@ using Timer = System.Timers.Timer;
 
 namespace ChatBot.Core.Services.Implementation
 {
-    public class TelegramBotService : ITelegramBotService, IDisposable
+    public class TelegramBotService : ITelegramBotService
     {
         private readonly ITelegramBotClient _bot;
         private readonly Timer _timer;
@@ -264,11 +264,6 @@ namespace ChatBot.Core.Services.Implementation
         private void LogUserAction(User user, string message, LogLevel logLevel = LogLevel.Information)
         {
             _logger.Log(logLevel, "User {user} {message}", user, message);
-        }
-
-        public void Dispose()
-        {
-            _timer.Dispose();
         }
 
         public async Task SendStartedMessageAsync(CancellationToken cancellationToken)

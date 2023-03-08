@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Google.Protobuf.WellKnownTypes;
+﻿using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using InvestCore.Domain.Models;
 using InvestCore.Domain.Services.Interfaces;
@@ -90,9 +89,11 @@ namespace InvestCore.TinkoffApi.Services
         {
             if (result.Count < tickerInfos.Count())
             {
+#pragma warning disable CS8629 // Тип значения, допускающего NULL, может быть NULL.
                 var defaultPrices = tickerInfos
                     .Where(x => x.DefaultPrice.HasValue)
                     .ToDictionary(x => x.Ticker, x => x.DefaultPrice.Value);
+#pragma warning restore CS8629 // Тип значения, допускающего NULL, может быть NULL.
 
                 foreach (var tickerInfo in tickerInfos.Where(x => !result.ContainsKey(x.Ticker)))
                 {

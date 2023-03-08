@@ -12,13 +12,12 @@ namespace ChatBotWorker
 {
     public class Program
     {
-        private static string _logFilePath;
-        private static string _telegramToken;
-        private static string _twelveDataApiToken;
-        private static long[] _availableIds;
+        private static string _logFilePath = string.Empty;
+        private static string _telegramToken = string.Empty;
+        private static long[] _availableIds = Array.Empty<long>();
         private static double _messageInterval;
         private static bool _needSendMessagesOnStart;
-        private static string _tinkoffToken;
+        private static string _tinkoffToken = string.Empty;
 
         public static Task Main(string[] args)
         {
@@ -26,7 +25,6 @@ namespace ChatBotWorker
             var configuration = BuildConfig();
 
             _telegramToken = configuration.GetRequiredSection("TelegramToken").Get<string>();
-            _twelveDataApiToken = configuration.GetRequiredSection("TwelveDataApiToken").Get<string>();
             _availableIds = configuration.GetRequiredSection("AvailableIds").Get<long[]>();
             _messageInterval = configuration.GetRequiredSection("MessageIntervalMs").Get<double>();
             _needSendMessagesOnStart = configuration.GetRequiredSection("NeedSendMessagesOnStart").Get<bool>();

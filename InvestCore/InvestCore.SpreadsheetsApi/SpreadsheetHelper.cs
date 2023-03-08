@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Google.Apis.Sheets.v4.Data;
+﻿using Google.Apis.Sheets.v4.Data;
 
 namespace InvestCore.SpreadsheetsApi
 {
@@ -31,7 +26,7 @@ namespace InvestCore.SpreadsheetsApi
         public static char ToColumnIndex(int columnIndex)
             => (char)(columnIndex + 0x40);
 
-        public static Color White = new()
+        private static readonly Color white = new()
         {
             Red = 1,
             Green = 1,
@@ -39,7 +34,7 @@ namespace InvestCore.SpreadsheetsApi
             Alpha = 1
         };
 
-        public static Color Black = new()
+        private static readonly Color black = new()
         {
             Red = 0,
             Green = 0,
@@ -47,7 +42,7 @@ namespace InvestCore.SpreadsheetsApi
             Alpha = 1
         };
 
-        public static Color Green = new()
+        private static readonly Color green = new()
         {
             Red = 87f / 255,
             Green = 187f / 255,
@@ -55,7 +50,7 @@ namespace InvestCore.SpreadsheetsApi
             Alpha = 1
         };
 
-        public static Color Yellow = new()
+        private static readonly Color yellow = new()
         {
             Red = 1,
             Green = 1,
@@ -63,7 +58,7 @@ namespace InvestCore.SpreadsheetsApi
             Alpha = 1
         };
 
-        public static Color Red = new()
+        private static readonly Color red = new()
         {
             Red = 1,
             Green = 0,
@@ -71,11 +66,18 @@ namespace InvestCore.SpreadsheetsApi
             Alpha = 1
         };
 
-        public static Border Border = new()
+        private static readonly Border border = new()
         {
             Color = Black,
             Style = "SOLID",
             Width = 1
         };
+
+        public static Color Yellow { get => yellow; }
+        public static Color Green { get => green; }
+        public static Color Red { get => red; }
+        public static Border Border { get => border; }
+        public static Color Black { get => black; }
+        public static Color White { get => white; }
     }
 }

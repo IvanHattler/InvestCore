@@ -13,7 +13,6 @@ stockPortfolio.TickerInfos = configuration.GetRequiredSection("TickerInfos").Get
     ?? new TickerInfo[0];
 var container = AppRegistry.BuildContainer(telegramToken);
 
-
 var messageService = container.Resolve<IMessageService>();
 Console.WriteLine(messageService.GetResultMessage(stockPortfolio));
 Console.ReadLine();

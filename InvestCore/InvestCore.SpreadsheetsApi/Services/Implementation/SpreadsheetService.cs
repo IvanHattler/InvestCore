@@ -1,5 +1,4 @@
-﻿using System;
-using Google.Apis.Sheets.v4;
+﻿using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using InvestCore.SpreadsheetsApi.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -135,7 +134,6 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             await batchRequest.ExecuteAsync();
             _logger.LogInformation("Current date style applied");
 
-
             var valueRange = new ValueRange
             {
                 Values = new List<IList<object>>
@@ -221,7 +219,6 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             };
         }
 
-
         private static Request GetSeparatorRequest(int rowIndex, int sheetId)
         {
             return new Request()
@@ -306,7 +303,6 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
 
         private static Request GetFormatAllTextRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
         {
-
             return new Request()
             {
                 UpdateCells = new UpdateCellsRequest()
