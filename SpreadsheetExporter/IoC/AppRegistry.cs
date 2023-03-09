@@ -23,9 +23,9 @@ namespace PercentCalculateConsole.IoC
             return new ConfigurationBuilder()
                 .AddEnvironmentVariables()
                 .AddUserSecrets(Assembly.GetExecutingAssembly())
-                .AddJsonFile("config.json", false)
-                .AddJsonFile("ticker-infos.json", false)
-                .AddJsonFile("tinkoff-token.json", false)
+                .AddJsonFile("configs/config.json", false)
+                .AddJsonFile("configs/ticker-infos.json", false)
+                .AddJsonFile("configs/tinkoff-token.json", false)
                 .Build();
         }
 
@@ -52,7 +52,7 @@ namespace PercentCalculateConsole.IoC
             builder.Register(c => InvestApiClientFactory.Create(tinkoffToken)).SingleInstance();
             builder.Register(c =>
             {
-                using var stream = new FileStream("client-secrets.json", FileMode.Open, FileAccess.Read);
+                using var stream = new FileStream("configs/client-secrets.json", FileMode.Open, FileAccess.Read);
                 return new SheetsService(new BaseClientService.Initializer()
                 {
                     HttpClientInitializer = GoogleCredential

@@ -5,7 +5,7 @@ namespace ChatBot.Core.Services.Implementation
 {
     public abstract class BaseShareService : IShareService
     {
-        public abstract Task<Dictionary<string, decimal>> GetCurrentOrLastPricesAsync(IEnumerable<(string, InstrumentType)> symbols);
+        public abstract Task<Dictionary<string, decimal>> GetCurrentOrLastPricesAsync(IEnumerable<TickerInfoBase> symbols);
 
         public abstract Task<Dictionary<string, decimal>> GetPricesAsync(IEnumerable<(string, InstrumentType)> symbols);
 

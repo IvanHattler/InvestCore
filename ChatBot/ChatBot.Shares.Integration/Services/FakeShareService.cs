@@ -6,9 +6,9 @@ namespace ChatBot.Shares.Integration.Services
 {
     public class FakeShareService : BaseShareService, IShareService
     {
-        public override Task<Dictionary<string, decimal>> GetCurrentOrLastPricesAsync(IEnumerable<(string, InstrumentType)> symbols)
+        public override Task<Dictionary<string, decimal>> GetCurrentOrLastPricesAsync(IEnumerable<TickerInfoBase> symbols)
         {
-            return GetPricesAsync(symbols);
+            return GetPricesAsync(symbols.Select(x => (x.Ticker, x.TickerType)));
         }
 
         public override Task<Dictionary<string, decimal>> GetPricesAsync(IEnumerable<(string, InstrumentType)> symbols)

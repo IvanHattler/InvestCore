@@ -17,9 +17,9 @@ namespace PercentCalculateConsole.IoC
             return new ConfigurationBuilder()
                 .AddEnvironmentVariables()
                 .AddUserSecrets(Assembly.GetExecutingAssembly())
-                .AddJsonFile("config.json", false)
-                .AddJsonFile("ticker-infos.json", false)
-                .AddJsonFile("tinkoff-token.json", false)
+                .AddJsonFile("configs/config.json", false)
+                .AddJsonFile("configs/ticker-infos.json", false)
+                .AddJsonFile("configs/tinkoff-token.json", false)
                 .Build();
         }
 
