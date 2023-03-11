@@ -23,7 +23,7 @@ namespace PercentCalculateConsole.Services.Implementation
             InstrumentCalculationModel corpBondDto,
             InstrumentCalculationModel gold,
             ReplenishmentModel replenishmentDto,
-            double stepPercent = .1)
+            double stepPercent = .05)
         {
             decimal sumForBuy = replenishmentDto.SumForBuy;
             decimal minSumForBuy = MinPercentForBuy * sumForBuy;

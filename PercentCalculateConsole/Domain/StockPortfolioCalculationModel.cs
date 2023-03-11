@@ -11,6 +11,7 @@ namespace InvestCore.PercentCalculateConsole.Domain
         public InstrumentCalculationModel CorpBond { get; set; } = new();
         public InstrumentCalculationModel Gold { get; set; } = new();
         public TickerInfo[] TickerInfos { get; set; } = Array.Empty<TickerInfo>();
+        public int MonthCountForCalculate { get; set; } = 1;
 
         public IEnumerable<TickerInfoBase> GetAllTickerInfos()
             => TickerInfos

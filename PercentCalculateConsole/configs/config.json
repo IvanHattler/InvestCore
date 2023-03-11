@@ -2,7 +2,7 @@
   "StockPortfolioCalculationModel": {
     "Replenishment": {
       "ReplenishmentAmount": 25000,
-      "CurrentSum": 7.6,
+      "CurrentSum": 20.84,
       "SavePercent": 0.01
     },
 
@@ -29,7 +29,9 @@
       "TargetPercent": 0.05,
       "Ticker": "SBGD",
       "TickerType": 2,
-      "DefaultPrice": 13.71
-    }
+      "DefaultPrice": 13.78
+    },
+
+    "MonthCountForCalculate": 3
   }
 }
