@@ -40,6 +40,10 @@ namespace PercentCalculateConsole.Services.Implementation
                     $"гос. облигации {stockPortfolio.GosBond.Ticker}, " +
                     $"корп. облигации {stockPortfolio.CorpBond.Ticker}, " +
                     $"золото {stockPortfolio.Gold.Ticker}");
+                sb.AppendLine($"Целевое распределение активов: акции {stockPortfolio.Share.TargetPercent:P2}, " +
+                    $"гос. облигации {stockPortfolio.GosBond.TargetPercent:P2}, " +
+                    $"корп. облигации {stockPortfolio.CorpBond.TargetPercent:P2}, " +
+                    $"золото {stockPortfolio.Gold.TargetPercent:P2}");
                 sb.AppendLine();
                 sb.AppendLine($"Сумма для покупки: {stockPortfolio.Replenishment.SumForBuy} руб.");
                 sb.AppendLine();

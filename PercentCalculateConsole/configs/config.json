@@ -8,13 +8,13 @@
 
     "Share": {
       "ClassType": 0,
-      "TargetPercent": 0.70,
+      "TargetPercent": 0.75,
       "Ticker": "SBMX",
       "TickerType": 2
     },
     "GosBond": {
       "ClassType": 1,
-      "TargetPercent": 0.2,
+      "TargetPercent": 0.15,
       "Ticker": "SBGB",
       "TickerType": 2
     },
