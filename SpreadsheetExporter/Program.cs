@@ -11,8 +11,8 @@ var telegramToken = configuration.GetRequiredSection("TinkoffToken").Get<string>
 var spreadsheetConfig = configuration.GetRequiredSection("SpreadsheetConfig").Get<SpreadsheetConfig>()
     ?? new SpreadsheetConfig();
 var container = AppRegistry.BuildContainer(telegramToken, spreadsheetConfig);
-var tickerInfos = configuration.GetRequiredSection("TickerInfos").Get<TickerInfoWithCount[]>()
-    ?? new TickerInfoWithCount[0];
+var tickerInfos = configuration.GetRequiredSection("TickerInfos").Get<TickerInfo[]>()
+    ?? new TickerInfo[0];
 
 var workflowService = container.Resolve<IWorkflowService>();
 

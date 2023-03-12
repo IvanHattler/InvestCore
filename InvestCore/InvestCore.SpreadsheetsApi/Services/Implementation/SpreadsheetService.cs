@@ -22,7 +22,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
 
         public async Task SendMainTableAsync(List<IList<object>> mainTableData, int startRow, int startColumn, string sheet, string spreadsheetId)
         {
-            var endRow = mainTableData.Count + 4;
+            var endRow = mainTableData.Count + startRow;
             var endColumn = startColumn + mainTableData.Max(x => x.Count);
 
             var sheetId = 0;
@@ -148,6 +148,31 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
 
             await updateRequest.ExecuteAsync();
             _logger.LogInformation("Send current date  value to range: {range}", range);
+        }
+
+        public async Task SendPercentsOfInsrumentsTable(List<IList<object>> table, int startRow, int startColumn, string sheet, string spreadsheetId)
+        {
+            var endRow = table.Count + startRow;
+            var endColumn = startColumn + table.Max(x => x.Count);
+
+            var sheetId = 0;
+            var batchRequest = _sheetsService.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
+            {
+                Requests = new List<Request>
+                {
+                    //Set format to all cells
+                    GetFormatAllTextRequest(startRow, startColumn, endRow, endColumn, sheetId),
+                    //Set percent format to last column
+                    GetFormatPercentRequest(startRow, endColumn - 1 , endRow, endColumn, sheetId),
+                    //Set border to all cells
+                    GetUpdateBordersRequest(startRow, startColumn, endRow, endColumn, sheetId, needHorizontalLines: true),
+                }
+            }, spreadsheetId);
+
+            await batchRequest.ExecuteAsync();
+            _logger.LogInformation("Percents of instruments table style applied");
+
+            await SetTableValues(table, startRow, startColumn, sheet, spreadsheetId, endRow, endColumn);
         }
 
         private async Task SetTableValues(List<IList<object>> mainTableData, int startRow, int startColumn, string sheet, string spreadsheetId, int endRow, int endColumn)
@@ -383,9 +408,9 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             };
         }
 
-        private static Request GetUpdateBordersRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
+        private static Request GetUpdateBordersRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId, bool needHorizontalLines = false)
         {
-            return new Request()
+            var request = new Request()
             {
                 UpdateBorders = new UpdateBordersRequest()
                 {
@@ -404,6 +429,13 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                     InnerVertical = SpreadsheetHelper.Border,
                 },
             };
+
+            if (needHorizontalLines)
+            {
+                request.UpdateBorders.InnerHorizontal = SpreadsheetHelper.Border;
+            }
+
+            return request;
         }
     }
 }

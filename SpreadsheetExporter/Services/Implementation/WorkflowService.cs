@@ -1,4 +1,5 @@
-﻿using InvestCore.Domain.Models;
+﻿using System.Diagnostics;
+using InvestCore.Domain.Models;
 using InvestCore.Domain.Services.Interfaces;
 using InvestCore.SpreadsheetsApi;
 using InvestCore.SpreadsheetsApi.Services.Interfaces;
@@ -21,29 +22,34 @@ namespace SpreadsheetExporter.Services.Implementation
             _logger = logger;
         }
 
-        public async Task UpdateTableAsync(TickerInfoWithCount[] tickerInfos, SpreadsheetConfig spreadsheetConfig)
+        public async Task UpdateTableAsync(TickerInfo[] tickerInfos, SpreadsheetConfig spreadsheetConfig)
         {
             var startRow = 4;
             var startColumn = 1;
 
-            var mainTableData = await GetMainTableAsync(tickerInfos, startColumn + 1, startRow + 1);
+            var prices = await _shareService.GetCurrentOrLastPricesAsync(tickerInfos);
+            var mainTableData = GetMainTableAsync(tickerInfos, startColumn + 1, startRow + 1, prices);
+            var percentOfInstrumentsTable = GetPercentOfInstrumentsTable(tickerInfos, prices);
+
+            await _spreadsheetService.SendCurrentDate(DateTime.Now, 3, 1, spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
 
             await _spreadsheetService.SendMainTableAsync(mainTableData, startRow, startColumn, spreadsheetConfig.Sheet,
                 spreadsheetConfig.SpreadsheetId);
 
-            await _spreadsheetService.SendCurrentDate(DateTime.Now, 3, 1, spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
+            var endRow = mainTableData.Count + startRow - 4;
+            var endColumn = startColumn + mainTableData.Max(x => x.Count) + 1;
+            await _spreadsheetService.SendPercentsOfInsrumentsTable(percentOfInstrumentsTable, endRow, endColumn,
+                spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
         }
 
-        public async Task<List<IList<object>>> GetMainTableAsync(TickerInfoWithCount[] tickerInfos,
-            int firstColumnIndex, int firstRowIndex)
+        public List<IList<object>> GetMainTableAsync(TickerInfo[] tickerInfos,
+            int firstColumnIndex, int firstRowIndex, Dictionary<string, decimal> prices)
         {
             var result = new List<IList<object>>(tickerInfos.Length + 3)
             {
                 new[] { "Общие доли портфеля" },
                 new[] { "Название", "Цена, р", "Количество", "Стоимость, р", "Доля" },
             };
-
-            var prices = await _shareService.GetCurrentOrLastPricesAsync(tickerInfos);
 
             var currentRowIndex = firstRowIndex + 1;
             var len = tickerInfos.Length + 2;
@@ -73,5 +79,19 @@ namespace SpreadsheetExporter.Services.Implementation
 
             return result;
         }
+
+        public List<IList<object>> GetPercentOfInstrumentsTable(TickerInfo[] tickerInfos, Dictionary<string, decimal> prices)
+            =>  new List<IList<object>>().WithAction(x =>
+            {
+                var sum = tickerInfos.Sum(y => prices[y.Ticker] * y.Count);
+                foreach (var grouping in tickerInfos.GroupBy(x => x.ClassType))
+                {
+                    x.Add(new object[]
+                    {
+                        grouping.Key.GetDisplayText(),
+                        grouping.Sum(y => prices[y.Ticker] * y.Count) / sum
+                    });
+                }
+            });
     }
 }
