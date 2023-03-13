@@ -32,6 +32,9 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                 {
                     //Move all sheet down
                     GetMoveAllSheetDownRequest(endRow + 2, sheetId),
+
+                    //todo: clear formatting space for tables
+
                     //Print horizontal separator line
                     GetSeparatorRequest(endRow + 2, sheetId),
 

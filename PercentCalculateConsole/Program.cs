@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using InvestCore.Domain.Models;
 using InvestCore.PercentCalculateConsole.Domain;
 using Microsoft.Extensions.Configuration;
 using PercentCalculateConsole.IoC;
@@ -10,7 +11,7 @@ var telegramToken = configuration.GetRequiredSection("TinkoffToken").Get<string>
 var stockPortfolio = configuration.GetRequiredSection("StockPortfolioCalculationModel").Get<StockPortfolioCalculationModel>()
     ?? new StockPortfolioCalculationModel();
 stockPortfolio.TickerInfos = configuration.GetRequiredSection("TickerInfos").Get<TickerInfo[]>()
-    ?? new TickerInfo[0];
+    ?? Array.Empty<TickerInfo>();
 var container = AppRegistry.BuildContainer(telegramToken);
 
 var messageService = container.Resolve<IMessageService>();
