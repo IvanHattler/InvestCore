@@ -61,6 +61,8 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
 
                     //Add conditional percent formatting
                     GetConditionalFormattingRequest(startRow + 2, endColumn - 1, endRow - 1, endColumn, sheetId),
+
+                    GetAutoResizeDimensionsRequest(0, maxColumn, sheetId),
                 }
             }, spreadsheetId);
 
@@ -121,6 +123,23 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
         //        }
         //    };
         //}
+
+        private static Request GetAutoResizeDimensionsRequest(int startColumn, int endColumn, int sheetId)
+        {
+            return new Request()
+            {
+                AutoResizeDimensions = new AutoResizeDimensionsRequest()
+                {
+                    Dimensions = new DimensionRange()
+                    {
+                        SheetId = sheetId,
+                        Dimension = "COLUMNS",
+                        StartIndex = startColumn,
+                        EndIndex = endColumn,
+                    }
+                }
+            };
+        }
 
         public async Task SendCurrentDate(DateTime dateTime, int row, int column, string sheet, string spreadsheetId)
         {
