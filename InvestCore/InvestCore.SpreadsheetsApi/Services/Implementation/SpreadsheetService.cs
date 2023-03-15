@@ -33,8 +33,6 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                     //Move all sheet down
                     GetMoveAllSheetDownRequest(endRow + 2, sheetId),
 
-                    //todo: clear formatting space for tables
-
                     //Print horizontal separator line
                     GetSeparatorRequest(endRow + 2, sheetId),
 
@@ -169,7 +167,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
 
             await updateRequest.ExecuteAsync();
-            _logger.LogInformation("Send current date  value to range: {range}", range);
+            _logger.LogInformation("Send current date value to range: {range}", range);
         }
 
         public async Task SendPercentsOfInsrumentsTable(List<IList<object>> table, int startRow, int startColumn, string sheet, string spreadsheetId)
@@ -209,7 +207,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
 
             await updateRequest.ExecuteAsync();
-            _logger.LogInformation("Send main table values to range: {range}", range);
+            _logger.LogInformation("Send table values to range: {range}", range);
         }
 
         private static Request GetConditionalFormattingRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
@@ -289,7 +287,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
         {
             return new Request()
             {
-                CopyPaste = new CopyPasteRequest()
+                CutPaste = new CutPasteRequest()
                 {
                     Source = new GridRange()
                     {
@@ -299,16 +297,13 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                         EndColumnIndex = maxColumn,
                         EndRowIndex = maxRow,
                     },
-                    Destination = new GridRange()
+                    Destination = new GridCoordinate()
                     {
                         SheetId = sheetId,
-                        StartRowIndex = rowCount,
-                        StartColumnIndex = 0,
-                        EndColumnIndex = maxColumn,
-                        EndRowIndex = maxRow + rowCount,
+                        RowIndex = rowCount,
+                        ColumnIndex = 0,
                     },
                     PasteType = "PASTE_NORMAL",
-                    PasteOrientation = "NORMAL",
                 }
             };
         }
