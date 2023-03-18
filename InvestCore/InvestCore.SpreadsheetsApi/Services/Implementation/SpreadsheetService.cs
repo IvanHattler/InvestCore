@@ -158,7 +158,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             {
                 Values = new List<IList<object>>
                 {
-                    new[] { $"{dateTime:d}" }
+                    new[] { $"{dateTime:g}" }
                 },
             };
 
@@ -185,7 +185,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                     //Set percent format to last column
                     GetFormatPercentRequest(startRow, endColumn - 1 , endRow, endColumn, sheetId),
                     //Set border to all cells
-                    GetUpdateBordersRequest(startRow, startColumn, endRow, endColumn, sheetId, needHorizontalLines: true),
+                    GetUpdateBordersRequest(startRow, startColumn, endRow, endColumn, sheetId),
                 }
             }, spreadsheetId);
 

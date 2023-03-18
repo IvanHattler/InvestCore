@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using InvestCore.Domain.Models;
+﻿using InvestCore.Domain.Models;
 using InvestCore.Domain.Services.Interfaces;
 using InvestCore.SpreadsheetsApi;
 using InvestCore.SpreadsheetsApi.Services.Interfaces;
@@ -31,10 +30,10 @@ namespace SpreadsheetExporter.Services.Implementation
             var mainTableData = GetMainTableAsync(tickerInfos, startColumn + 1, startRow + 1, prices);
             var percentOfInstrumentsTable = GetPercentOfInstrumentsTable(tickerInfos, prices);
 
-            await _spreadsheetService.SendCurrentDate(DateTime.Now, 3, 1, spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
-
             await _spreadsheetService.SendMainTableAsync(mainTableData, startRow, startColumn, spreadsheetConfig.Sheet,
                 spreadsheetConfig.SpreadsheetId);
+
+            await _spreadsheetService.SendCurrentDate(DateTime.Now, 3, 1, spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
 
             var endRow = mainTableData.Count + startRow - 4;
             var endColumn = startColumn + mainTableData.Max(x => x.Count) + 1;
