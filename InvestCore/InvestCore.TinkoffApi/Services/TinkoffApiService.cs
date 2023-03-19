@@ -21,6 +21,13 @@ namespace InvestCore.TinkoffApi.Services
             _logger = logger;
         }
 
+        public async Task<decimal?> GetUSDRUBAsync()
+        {
+            //BBG0013HGFT4 USD000UTSTOM
+            return await GetByCandles("BBG0013HGFT4")
+                ?? await GetClosePriceByCandles("BBG0013HGFT4");
+        }
+
         public async Task<Dictionary<string, decimal>> GetPricesAsync(IEnumerable<(string, InstrumentType)> symbols)
         {
             var result = new Dictionary<string, decimal>(symbols.Count());
@@ -238,6 +245,7 @@ namespace InvestCore.TinkoffApi.Services
                                                 IdType = InstrumentIdType.Ticker,
                                                 ClassCode = "TQTF",
                                                 Id = symbol,
+
                                             }
                                         )).Instrument;
 

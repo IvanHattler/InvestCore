@@ -26,5 +26,10 @@ namespace InvestCore.Domain.Services.Implementation
             }
             return Task.FromResult(res);
         }
+
+        public Task<decimal?> GetUSDRUBAsync()
+        {
+            return Task.FromResult(75m);
+        }
     }
 }
