@@ -139,7 +139,7 @@ namespace InvestCore.TinkoffApi.Services
                 }
                 catch (InstrumentNotFoundException e)
                 {
-                    _logger.LogCritical(e.Message);
+                    _logger.LogCritical("Ticker {ticker} not found", e.Message);
                 }
                 catch (RpcException e)
                 {
@@ -149,7 +149,7 @@ namespace InvestCore.TinkoffApi.Services
                     }
                     if (e.StatusCode == StatusCode.NotFound)
                     {
-                        _logger.LogCritical("Ticker not found");
+                        _logger.LogCritical("Ticker {ticker} not found", symbolModel.Symbol);
                     }
                 }
             }
@@ -200,7 +200,7 @@ namespace InvestCore.TinkoffApi.Services
                 }
                 catch (InstrumentNotFoundException e)
                 {
-                    _logger.LogCritical(e.Message);
+                    _logger.LogCritical("Ticker {ticker} not found", e.Message);
                 }
                 catch (RpcException e)
                 {
@@ -210,7 +210,7 @@ namespace InvestCore.TinkoffApi.Services
                     }
                     if (e.StatusCode == StatusCode.NotFound)
                     {
-                        _logger.LogCritical("Ticker not found");
+                        _logger.LogCritical("Ticker {ticker} not found", tickerInfo.Ticker);
                     }
                 }
             }
@@ -218,7 +218,7 @@ namespace InvestCore.TinkoffApi.Services
             return res;
         }
 
-        private async Task<(string, MoneyValue?, string)> GetDataForPrice(string? ticker, InstrumentType type, string classCode)
+        private async Task<(string, MoneyValue?, string)> GetDataForPrice(string ticker, InstrumentType type, string classCode)
         {
             switch (type)
             {
@@ -227,7 +227,7 @@ namespace InvestCore.TinkoffApi.Services
                         var share = (await GetSharesAsync())
                             .Where(x => x.Ticker == ticker && x.ClassCode == classCode)
                             .FirstOrDefault()
-                            ?? throw new InstrumentNotFoundException($"Ticker {ticker} not found");
+                            ?? throw new InstrumentNotFoundException(ticker);
 
                         return (share.Figi, null, share.Currency);
                     }
@@ -236,7 +236,7 @@ namespace InvestCore.TinkoffApi.Services
                         var bond = (await GetBondsAsync())
                             .Where(x => x.Ticker == ticker && x.ClassCode == classCode)
                             .FirstOrDefault()
-                            ?? throw new InstrumentNotFoundException($"Ticker {ticker} not found");
+                            ?? throw new InstrumentNotFoundException(ticker);
 
                         return (bond.Figi, bond.Nominal, bond.Currency);
                     }
@@ -245,7 +245,7 @@ namespace InvestCore.TinkoffApi.Services
                         var etf = (await GetEtfsAsync())
                             .Where(x => x.Ticker == ticker && x.ClassCode == classCode)
                             .FirstOrDefault()
-                            ?? throw new InstrumentNotFoundException($"Ticker {ticker} not found");
+                            ?? throw new InstrumentNotFoundException(ticker);
 
                         return (etf.Figi, null, etf.Currency);
                     }
