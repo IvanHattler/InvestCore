@@ -55,7 +55,9 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                     //Set format to all cells
                     GetFormatAllTextRequest(startRow, startColumn, endRow, endColumn, sheetId),
                     //Set percent format to last column
-                    GetFormatPercentRequest(startRow + 2, endColumn - 1 , endRow, endColumn, sheetId),
+                    GetFormatNumberRequest(startRow + 2, endColumn - 1, endRow, endColumn, sheetId),
+                    GetFormatNumberRequest(startRow + 2, endColumn - 2, endRow, endColumn - 1, sheetId, pattern: "0.00"),
+                    GetFormatNumberRequest(startRow + 2, startColumn + 1, endRow, startColumn + 2, sheetId, pattern: "0.00"),
 
                     //Add conditional percent formatting
                     GetConditionalFormattingRequest(startRow + 2, endColumn - 1, endRow - 1, endColumn, sheetId),
@@ -183,7 +185,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                     //Set format to all cells
                     GetFormatAllTextRequest(startRow, startColumn, endRow, endColumn, sheetId),
                     //Set percent format to last column
-                    GetFormatPercentRequest(startRow, endColumn - 1 , endRow, endColumn, sheetId),
+                    GetFormatNumberRequest(startRow, endColumn - 1 , endRow, endColumn, sheetId),
                     //Set border to all cells
                     GetUpdateBordersRequest(startRow, startColumn, endRow, endColumn, sheetId),
                 }
@@ -308,7 +310,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             };
         }
 
-        private static Request GetFormatPercentRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
+        private static Request GetFormatNumberRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId, string pattern = "0.00%")
         {
             var cellData = new CellData()
             {
@@ -316,7 +318,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                 {
                     NumberFormat = new NumberFormat
                     {
-                        Pattern = "0.00%",
+                        Pattern = pattern,
                         Type = "NUMBER"
                     }
                 }

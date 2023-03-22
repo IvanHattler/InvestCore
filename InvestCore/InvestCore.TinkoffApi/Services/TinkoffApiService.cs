@@ -1,8 +1,10 @@
-﻿using Google.Protobuf.WellKnownTypes;
+﻿using System.Net.Http.Headers;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using InvestCore.Domain.Models;
 using InvestCore.Domain.Services.Interfaces;
 using InvestCore.TinkoffApi.Domain;
+using InvestCore.TinkoffApi.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Tinkoff.InvestApi;
 using Tinkoff.InvestApi.V1;
@@ -14,6 +16,11 @@ namespace InvestCore.TinkoffApi.Services
     {
         private readonly InvestApiClient _investApiClient;
         private readonly ILogger _logger;
+        const string Usd = "usd";
+        private decimal? USDRUB;
+        private IEnumerable<Share> Shares;
+        private IEnumerable<Bond> Bonds;
+        private IEnumerable<Etf> Etfs;
 
         public TinkoffApiService(InvestApiClient investApiClient, ILogger logger)
         {
@@ -23,23 +30,76 @@ namespace InvestCore.TinkoffApi.Services
 
         public async Task<decimal?> GetUSDRUBAsync()
         {
-            //BBG0013HGFT4 USD000UTSTOM
-            return await GetByCandles("BBG0013HGFT4")
-                ?? await GetClosePriceByCandles("BBG0013HGFT4");
-        }
-
-        public async Task<Dictionary<string, decimal>> GetPricesAsync(IEnumerable<(string, InstrumentType)> symbols)
-        {
-            var result = new Dictionary<string, decimal>(symbols.Count());
             try
             {
-                foreach (var (symbol, type) in symbols)
+                //BBG0013HGFT4 USD000UTSTOM
+                return USDRUB ??= await GetByCandles("BBG0013HGFT4")
+                    ?? await GetClosePriceByCandles("BBG0013HGFT4");
+            }
+            finally
+            {
+                _logger.LogInformation("Выполнен запрос к TinkoffApi");
+            }
+        }
+        protected async Task<IEnumerable<Share>> GetSharesAsync()
+        {
+            if (Shares == null)
+            {
+                try
                 {
-                    var currentPrice = await GetCurrentPrice(symbol, type);
+                    Shares = (await _investApiClient.Instruments.SharesAsync()).Instruments;
+                }
+                finally
+                {
+                    _logger.LogInformation("Выполнен запрос к TinkoffApi");
+                }
+            }
+            return Shares;
+        }
+        protected async Task<IEnumerable<Bond>> GetBondsAsync()
+        {
+            if (Bonds == null)
+            {
+                try
+                {
+                    Bonds = (await _investApiClient.Instruments.BondsAsync()).Instruments;
+                }
+                finally
+                {
+                    _logger.LogInformation("Выполнен запрос к TinkoffApi");
+                }
+            }
+            return Bonds;
+
+        }
+        protected async Task<IEnumerable<Etf>> GetEtfsAsync()
+        {
+            if (Etfs == null)
+            {
+                try
+                {
+                    Etfs = (await _investApiClient.Instruments.EtfsAsync()).Instruments;
+                }
+                finally
+                {
+                    _logger.LogInformation("Выполнен запрос к TinkoffApi");
+                }
+            }
+            return Etfs;
+        }
+
+        public async Task<Dictionary<string, decimal>> GetPricesAsync(IEnumerable<TickerInfoBase> tickerInfos)
+        {
+            var result = new Dictionary<string, decimal>(tickerInfos.Count());
+            try
+            {
+                foreach (var tickerInfo in tickerInfos)
+                {
+                    var currentPrice = await GetCurrentPrice(tickerInfo.Ticker, tickerInfo.TickerType, tickerInfo.ClassCode);
 
                     if (currentPrice.HasValue)
                     {
-                        result.TryAdd(symbol, currentPrice.Value);
+                        result.TryAdd(tickerInfo.Ticker, currentPrice.Value);
                     }
                 }
             }
@@ -67,12 +127,19 @@ namespace InvestCore.TinkoffApi.Services
             {
                 try
                 {
-                    var currentPrice = await GetCurrentOrLastPrice(symbolModel.Figi, symbolModel.Type, symbolModel.Nominal);
+                    var currentPrice = await GetCurrentOrLastPrice(symbolModel);
 
                     if (currentPrice.HasValue)
                     {
+                        if (symbolModel.Currency == Usd)
+                            currentPrice *= await GetUSDRUBAsync();
+
                         result.TryAdd(symbolModel.Symbol, currentPrice.Value);
                     }
+                }
+                catch (InstrumentNotFoundException e)
+                {
+                    _logger.LogCritical(e.Message);
                 }
                 catch (RpcException e)
                 {
@@ -121,14 +188,19 @@ namespace InvestCore.TinkoffApi.Services
             {
                 try
                 {
-                    var figiAndNominal = await GetFigiAndNominal(tickerInfo.Ticker, tickerInfo.TickerType);
+                    var figiAndNominal = await GetDataForPrice(tickerInfo.Ticker, tickerInfo.TickerType, tickerInfo.ClassCode);
                     res.Add(new SymbolModel()
                     {
                         Symbol = tickerInfo.Ticker,
                         Type = tickerInfo.TickerType,
                         Figi = figiAndNominal.Item1,
                         Nominal = figiAndNominal.Item2,
+                        Currency = figiAndNominal.Item3,
                     });
+                }
+                catch (InstrumentNotFoundException e)
+                {
+                    _logger.LogCritical(e.Message);
                 }
                 catch (RpcException e)
                 {
@@ -146,61 +218,43 @@ namespace InvestCore.TinkoffApi.Services
             return res;
         }
 
-        private async Task<(string, MoneyValue?)> GetFigiAndNominal(string? symbol, InstrumentType type)
+        private async Task<(string, MoneyValue?, string)> GetDataForPrice(string? ticker, InstrumentType type, string classCode)
         {
-            try
+            switch (type)
             {
-                switch (type)
-                {
-                    case InstrumentType.Share:
-                        {
-                            var share = (await _investApiClient.Instruments.ShareByAsync(
-                                             new InstrumentRequest()
-                                             {
-                                                 IdType = InstrumentIdType.Ticker,
-                                                 ClassCode = "TQBR",
-                                                 Id = symbol,
-                                             })).Instrument;
+                case InstrumentType.Share:
+                    {
+                        var share = (await GetSharesAsync())
+                            .Where(x => x.Ticker == ticker && x.ClassCode == classCode)
+                            .FirstOrDefault()
+                            ?? throw new InstrumentNotFoundException($"Ticker {ticker} not found");
 
-                            return (share.Figi, null);
-                        }
-                    case InstrumentType.Bond:
-                        {
-                            var bond = (await _investApiClient.Instruments.BondByAsync(
-                                            new InstrumentRequest()
-                                            {
-                                                IdType = InstrumentIdType.Ticker,
-                                                ClassCode = "TQCB",
-                                                Id = symbol,
-                                            }
-                                        )).Instrument;
+                        return (share.Figi, null, share.Currency);
+                    }
+                case InstrumentType.Bond:
+                    {
+                        var bond = (await GetBondsAsync())
+                            .Where(x => x.Ticker == ticker && x.ClassCode == classCode)
+                            .FirstOrDefault()
+                            ?? throw new InstrumentNotFoundException($"Ticker {ticker} not found");
 
-                            return (bond.Figi, bond.Nominal);
-                        }
-                    case InstrumentType.Etf:
-                        {
-                            var etf = (await _investApiClient.Instruments.EtfByAsync(
-                                            new InstrumentRequest()
-                                            {
-                                                IdType = InstrumentIdType.Ticker,
-                                                ClassCode = "TQTF",
-                                                Id = symbol,
-                                            }
-                                        )).Instrument;
+                        return (bond.Figi, bond.Nominal, bond.Currency);
+                    }
+                case InstrumentType.Etf:
+                    {
+                        var etf = (await GetEtfsAsync())
+                            .Where(x => x.Ticker == ticker && x.ClassCode == classCode)
+                            .FirstOrDefault()
+                            ?? throw new InstrumentNotFoundException($"Ticker {ticker} not found");
 
-                            return (etf.Figi, null);
-                        }
-                    default:
-                        throw new NotImplementedException();
-                }
-            }
-            finally
-            {
-                _logger.LogInformation("Выполнен запрос к TinkoffApi");
+                        return (etf.Figi, null, etf.Currency);
+                    }
+                default:
+                    throw new NotImplementedException();
             }
         }
 
-        private async Task<decimal?> GetCurrentPrice(string symbol, InstrumentType type)
+        private async Task<decimal?> GetCurrentPrice(string symbol, InstrumentType type, string classCode)
         {
             try
             {
@@ -212,7 +266,7 @@ namespace InvestCore.TinkoffApi.Services
                                             new InstrumentRequest()
                                             {
                                                 IdType = InstrumentIdType.Ticker,
-                                                ClassCode = "TQBR",
+                                                ClassCode = classCode,
                                                 Id = symbol,
                                             }
                                         )).Instrument;
@@ -225,7 +279,7 @@ namespace InvestCore.TinkoffApi.Services
                                             new InstrumentRequest()
                                             {
                                                 IdType = InstrumentIdType.Ticker,
-                                                ClassCode = "TQCB",
+                                                ClassCode = classCode,
                                                 Id = symbol,
                                             }
                                         )).Instrument;
@@ -243,7 +297,7 @@ namespace InvestCore.TinkoffApi.Services
                                             new InstrumentRequest()
                                             {
                                                 IdType = InstrumentIdType.Ticker,
-                                                ClassCode = "TQTF",
+                                                ClassCode = classCode,
                                                 Id = symbol,
 
                                             }
@@ -261,30 +315,30 @@ namespace InvestCore.TinkoffApi.Services
             }
         }
 
-        private async Task<decimal?> GetCurrentOrLastPrice(string figi, InstrumentType type, MoneyValue? nominal)
+        private async Task<decimal?> GetCurrentOrLastPrice(SymbolModel model)
         {
             try
             {
-                switch (type)
+                switch (model.Type)
                 {
                     case InstrumentType.Share:
                     case InstrumentType.Etf:
                         {
-                            return await GetByCandles(figi)
-                                ?? await GetClosePriceByCandles(figi);
+                            return await GetByCandles(model.Figi)
+                                ?? await GetClosePriceByCandles(model.Figi);
                         }
                     case InstrumentType.Bond:
                         {
-                            if (nominal == null)
+                            if (model.Nominal == null)
                                 return null;
 
-                            var price = await GetByCandles(figi)
-                                ?? await GetClosePriceByCandles(figi);
+                            var price = await GetByCandles(model.Figi)
+                                ?? await GetClosePriceByCandles(model.Figi);
 
                             if (price == null)
                                 return null;
 
-                            return await CalculateBondPrice(figi, nominal, price.Value);
+                            return await CalculateBondPrice(model.Figi, model.Nominal, price.Value);
                         }
                     default:
                         throw new NotImplementedException();
