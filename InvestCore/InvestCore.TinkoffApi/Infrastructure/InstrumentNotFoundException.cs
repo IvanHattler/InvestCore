@@ -5,7 +5,6 @@
         public InstrumentNotFoundException(string message)
             : base(message)
         {
-
         }
     }
 }

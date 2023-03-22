@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace InvestCore.Domain.Models
+﻿namespace InvestCore.Domain.Models
 {
     public class PortfolioInvestmentModel
     {

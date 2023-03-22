@@ -86,7 +86,7 @@ namespace SpreadsheetExporter.Services.Implementation
         }
 
         protected List<IList<object>> GetPercentOfInstrumentsTable(TickerInfo[] tickerInfos, Dictionary<string, decimal> prices)
-            =>  new List<IList<object>>().WithAction(x =>
+            => new List<IList<object>>().WithAction(x =>
             {
                 var sum = tickerInfos.Sum(y => prices[y.Ticker] * y.Count);
                 foreach (var grouping in tickerInfos.GroupBy(x => x.ClassType))

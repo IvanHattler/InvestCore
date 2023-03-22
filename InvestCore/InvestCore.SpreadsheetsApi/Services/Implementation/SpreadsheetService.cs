@@ -128,7 +128,6 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             await SetTableValues(table, startRow, startColumn, sheet, spreadsheetId, endRow, endColumn);
         }
 
-
         public async Task SendDictionaryTable(List<IList<object>> table, int startRow, int startColumn, string sheet, string spreadsheetId)
         {
             var endRow = table.Count + startRow;
@@ -227,6 +226,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                 }
             };
         }
+
         private async Task SetTableValues(List<IList<object>> mainTableData, int startRow, int startColumn, string sheet, string spreadsheetId, int endRow, int endColumn)
         {
             var valueRange = new ValueRange
@@ -488,6 +488,6 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             return request;
         }
 
-        #endregion
+        #endregion Private methods
     }
 }

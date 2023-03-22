@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Headers;
-using Google.Protobuf.WellKnownTypes;
+﻿using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using InvestCore.Domain.Models;
 using InvestCore.Domain.Services.Interfaces;
@@ -16,7 +15,7 @@ namespace InvestCore.TinkoffApi.Services
     {
         private readonly InvestApiClient _investApiClient;
         private readonly ILogger _logger;
-        const string Usd = "usd";
+        private const string Usd = "usd";
         private decimal? USDRUB;
         private IEnumerable<Share> Shares;
         private IEnumerable<Bond> Bonds;
@@ -45,6 +44,7 @@ namespace InvestCore.TinkoffApi.Services
             }
             return USDRUB;
         }
+
         protected async Task<IEnumerable<Share>> GetSharesAsync()
         {
             if (Shares == null)
@@ -60,6 +60,7 @@ namespace InvestCore.TinkoffApi.Services
             }
             return Shares;
         }
+
         protected async Task<IEnumerable<Bond>> GetBondsAsync()
         {
             if (Bonds == null)
@@ -74,8 +75,8 @@ namespace InvestCore.TinkoffApi.Services
                 }
             }
             return Bonds;
-
         }
+
         protected async Task<IEnumerable<Etf>> GetEtfsAsync()
         {
             if (Etfs == null)
@@ -303,7 +304,6 @@ namespace InvestCore.TinkoffApi.Services
                                                 IdType = InstrumentIdType.Ticker,
                                                 ClassCode = classCode,
                                                 Id = symbol,
-
                                             }
                                         )).Instrument;
 

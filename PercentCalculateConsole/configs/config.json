@@ -1,6 +1,5 @@
 {
   "StockPortfolioCalculationModel": {
-
     "Share": {
       "ClassType": 0,
       "TargetPercent": 0.75,
