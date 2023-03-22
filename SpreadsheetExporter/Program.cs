@@ -12,7 +12,9 @@ var spreadsheetConfig = configuration.GetRequiredSection("SpreadsheetConfig").Ge
     ?? new SpreadsheetConfig();
 var container = AppRegistry.BuildContainer(telegramToken, spreadsheetConfig);
 var tickerInfos = configuration.GetRequiredSection("TickerInfos").Get<TickerInfo[]>()
-    ?? new TickerInfo[0];
+    ?? Array.Empty<TickerInfo>();
+var replenisment = configuration.GetRequiredSection("Replenishment").Get<ReplenishmentModel>()
+    ?? new ReplenishmentModel();
 
 var workflowService = container.Resolve<IWorkflowService>();
 

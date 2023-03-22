@@ -1,4 +1,4 @@
-﻿namespace PercentCalculateConsole.Domain
+﻿namespace InvestCore.Domain.Models
 {
     public class ReplenishmentModel
     {
