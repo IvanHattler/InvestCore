@@ -15,7 +15,9 @@ var tickerInfos = configuration.GetRequiredSection("TickerInfos").Get<TickerInfo
     ?? Array.Empty<TickerInfo>();
 var replenisment = configuration.GetRequiredSection("Replenishment").Get<ReplenishmentModel>()
     ?? new ReplenishmentModel();
+var portfolioInvestment = configuration.GetRequiredSection("PortfolioInvestment").Get<PortfolioInvestmentModel>()
+    ?? new PortfolioInvestmentModel();
 
 var workflowService = container.Resolve<IWorkflowService>();
 
-await workflowService.UpdateTableAsync(tickerInfos, spreadsheetConfig);
+await workflowService.UpdateTableAsync(tickerInfos, spreadsheetConfig, replenisment, portfolioInvestment);

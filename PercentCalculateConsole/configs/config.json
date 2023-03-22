@@ -1,34 +1,33 @@
 {
   "StockPortfolioCalculationModel": {
-    "Replenishment": {
-      "ReplenishmentAmount": 25000,
-      "CurrentSum": 153.45,
-      "SavePercent": 0.01
-    },
 
     "Share": {
       "ClassType": 0,
       "TargetPercent": 0.75,
       "Ticker": "SBMX",
-      "TickerType": 2
+      "TickerType": 2,
+      "ClassCode": "TQTF"
     },
     "GosBond": {
       "ClassType": 1,
       "TargetPercent": 0.15,
       "Ticker": "SBGB",
-      "TickerType": 2
+      "TickerType": 2,
+      "ClassCode": "TQTF"
     },
     "CorpBond": {
       "ClassType": 2,
       "TargetPercent": 0.05,
       "Ticker": "SBRB",
-      "TickerType": 2
+      "TickerType": 2,
+      "ClassCode": "TQTF"
     },
     "Gold": {
       "ClassType": 3,
       "TargetPercent": 0.05,
       "Ticker": "SBGD",
-      "TickerType": 2
+      "TickerType": 2,
+      "ClassCode": "TQTF"
     },
 
     "MonthCountForCalculate": 3

@@ -49,9 +49,9 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                     GetUpdateBordersRequest(endRow - 1, startColumn + 2, endRow, endColumn, sheetId),
 
                     //Set format to first cell
-                    GetFormatTextCenterRequest(startRow, startColumn, startRow + 1, startColumn + 1, sheetId),
+                    GetFormatHorizontalAlignmentRequest(startRow, startColumn, startRow + 1, startColumn + 1, sheetId),
                     //Set format to second row
-                    GetFormatTextCenterRequest(startRow + 1, startColumn, startRow + 2, endColumn, sheetId),
+                    GetFormatHorizontalAlignmentRequest(startRow + 1, startColumn, startRow + 2, endColumn, sheetId),
                     //Set format to all cells
                     GetFormatAllTextRequest(startRow, startColumn, endRow, endColumn, sheetId),
                     //Set percent format to last column
@@ -71,6 +71,93 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
 
             await SetTableValues(mainTableData, startRow, startColumn, sheet, spreadsheetId, endRow, endColumn);
         }
+
+        public async Task SendCurrentDate(DateTime dateTime, int row, int column, string sheet, string spreadsheetId)
+        {
+            var sheetId = 0;
+            var batchRequest = _sheetsService.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
+            {
+                Requests = new List<Request>
+                {
+                    GetFormatAllTextRequest(row - 1, column - 1, row, column, sheetId),
+                    GetFormatHorizontalAlignmentRequest(row - 1, column - 1, row, column, sheetId),
+                }
+            }, spreadsheetId);
+
+            await batchRequest.ExecuteAsync();
+            _logger.LogInformation("Current date style applied");
+
+            var valueRange = new ValueRange
+            {
+                Values = new List<IList<object>>
+                {
+                    new[] { $"{dateTime:g}" }
+                },
+            };
+
+            string range = SpreadsheetHelper.GetTableRange(sheet, row, column, row + 1, column + 1);
+            var updateRequest = _sheetsService.Spreadsheets.Values.Update(valueRange, spreadsheetId, range);
+            updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+
+            await updateRequest.ExecuteAsync();
+            _logger.LogInformation("Send current date value to range: {range}", range);
+        }
+
+        public async Task SendPercentsOfInsrumentsTable(List<IList<object>> table, int startRow, int startColumn, string sheet, string spreadsheetId)
+        {
+            var endRow = table.Count + startRow;
+            var endColumn = startColumn + table.Max(x => x.Count);
+
+            var sheetId = 0;
+            var batchRequest = _sheetsService.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
+            {
+                Requests = new List<Request>
+                {
+                    //Set format to all cells
+                    GetFormatAllTextRequest(startRow, startColumn, endRow, endColumn, sheetId),
+                    //Set percent format to last column
+                    GetFormatNumberRequest(startRow, endColumn - 1 , endRow, endColumn, sheetId),
+                    //Set border to all cells
+                    GetUpdateBordersRequest(startRow, startColumn, endRow, endColumn, sheetId),
+                }
+            }, spreadsheetId);
+
+            await batchRequest.ExecuteAsync();
+            _logger.LogInformation("Percents of instruments table style applied");
+
+            await SetTableValues(table, startRow, startColumn, sheet, spreadsheetId, endRow, endColumn);
+        }
+
+
+        public async Task SendDictionaryTable(List<IList<object>> table, int startRow, int startColumn, string sheet, string spreadsheetId)
+        {
+            var endRow = table.Count + startRow;
+            var endColumn = startColumn + table.Max(x => x.Count);
+
+            var sheetId = 0;
+            var batchRequest = _sheetsService.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
+            {
+                Requests = new List<Request>
+                {
+                    //Merge first cell
+                    GetMergeCellsRequest(startRow, startColumn, startRow + 1, endColumn, sheetId),
+                    GetFormatHorizontalAlignmentRequest(startRow, startColumn, startRow + 1, startColumn + 1, sheetId),
+                    GetFormatHorizontalAlignmentRequest(endRow - 2, endColumn - 1, endRow, endColumn, sheetId, "RIGHT"),
+                    //Set format to all cells
+                    GetFormatAllTextRequest(startRow, startColumn, endRow, endColumn, sheetId),
+                    //Set border to all cells
+                    GetUpdateBordersRequest(startRow, startColumn, endRow, endColumn, sheetId),
+                    GetUpdateBordersRequest(startRow, startColumn, startRow + 1, startColumn + 1, sheetId),
+                }
+            }, spreadsheetId);
+
+            await batchRequest.ExecuteAsync();
+            _logger.LogInformation("Dictionary table style applied");
+
+            await SetTableValues(table, startRow, startColumn, sheet, spreadsheetId, endRow, endColumn);
+        }
+
+        #region Private methods
 
         //private static Request GetChartRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
         //{
@@ -140,63 +227,6 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                 }
             };
         }
-
-        public async Task SendCurrentDate(DateTime dateTime, int row, int column, string sheet, string spreadsheetId)
-        {
-            var sheetId = 0;
-            var batchRequest = _sheetsService.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
-            {
-                Requests = new List<Request>
-                {
-                    GetFormatAllTextRequest(row - 1, column - 1, row, column, sheetId),
-                    GetFormatTextCenterRequest(row - 1, column - 1, row, column, sheetId),
-                }
-            }, spreadsheetId);
-
-            await batchRequest.ExecuteAsync();
-            _logger.LogInformation("Current date style applied");
-
-            var valueRange = new ValueRange
-            {
-                Values = new List<IList<object>>
-                {
-                    new[] { $"{dateTime:g}" }
-                },
-            };
-
-            string range = SpreadsheetHelper.GetTableRange(sheet, row, column, row + 1, column + 1);
-            var updateRequest = _sheetsService.Spreadsheets.Values.Update(valueRange, spreadsheetId, range);
-            updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
-
-            await updateRequest.ExecuteAsync();
-            _logger.LogInformation("Send current date value to range: {range}", range);
-        }
-
-        public async Task SendPercentsOfInsrumentsTable(List<IList<object>> table, int startRow, int startColumn, string sheet, string spreadsheetId)
-        {
-            var endRow = table.Count + startRow;
-            var endColumn = startColumn + table.Max(x => x.Count);
-
-            var sheetId = 0;
-            var batchRequest = _sheetsService.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
-            {
-                Requests = new List<Request>
-                {
-                    //Set format to all cells
-                    GetFormatAllTextRequest(startRow, startColumn, endRow, endColumn, sheetId),
-                    //Set percent format to last column
-                    GetFormatNumberRequest(startRow, endColumn - 1 , endRow, endColumn, sheetId),
-                    //Set border to all cells
-                    GetUpdateBordersRequest(startRow, startColumn, endRow, endColumn, sheetId),
-                }
-            }, spreadsheetId);
-
-            await batchRequest.ExecuteAsync();
-            _logger.LogInformation("Percents of instruments table style applied");
-
-            await SetTableValues(table, startRow, startColumn, sheet, spreadsheetId, endRow, endColumn);
-        }
-
         private async Task SetTableValues(List<IList<object>> mainTableData, int startRow, int startColumn, string sheet, string spreadsheetId, int endRow, int endColumn)
         {
             var valueRange = new ValueRange
@@ -378,7 +408,8 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             };
         }
 
-        private static Request GetFormatTextCenterRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
+        private static Request GetFormatHorizontalAlignmentRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId,
+            string horizontalAlignment = "CENTER")
         {
             return new Request()
             {
@@ -400,7 +431,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                         {
                             UserEnteredFormat = new CellFormat()
                             {
-                                HorizontalAlignment = "CENTER",
+                                HorizontalAlignment = horizontalAlignment,
                             }
                         })
                     })
@@ -456,5 +487,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
 
             return request;
         }
+
+        #endregion
     }
 }

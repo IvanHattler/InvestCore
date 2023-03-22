@@ -27,6 +27,7 @@ namespace PercentCalculateConsole.IoC
                 .AddJsonFile("configs/ticker-infos.json", false)
                 .AddJsonFile("configs/tinkoff-token.json", false)
                 .AddJsonFile("configs/replenishment.json", false)
+                .AddJsonFile("configs/portfolio-investment.json", false)
                 .Build();
         }
 

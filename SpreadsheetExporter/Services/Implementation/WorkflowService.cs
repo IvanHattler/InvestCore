@@ -21,27 +21,33 @@ namespace SpreadsheetExporter.Services.Implementation
             _logger = logger;
         }
 
-        public async Task UpdateTableAsync(TickerInfo[] tickerInfos, SpreadsheetConfig spreadsheetConfig)
+        public async Task UpdateTableAsync(TickerInfo[] tickerInfos, SpreadsheetConfig spreadsheetConfig,
+            ReplenishmentModel replenishment,
+            PortfolioInvestmentModel portfolioInvestment)
         {
             var startRow = 4;
             var startColumn = 1;
 
             var prices = await _shareService.GetCurrentOrLastPricesAsync(tickerInfos);
             var mainTableData = GetMainTableAsync(tickerInfos, startColumn + 1, startRow + 1, prices);
+
+            var endRow = mainTableData.Count + startRow - 4;
+            var endColumn = startColumn + mainTableData.Max(x => x.Count) + 1;
             var percentOfInstrumentsTable = GetPercentOfInstrumentsTable(tickerInfos, prices);
+            var dictionaryTable = GetDictionaryTable(tickerInfos, endColumn, startRow, prices, replenishment.CurrentSum, portfolioInvestment);
 
             await _spreadsheetService.SendMainTableAsync(mainTableData, startRow, startColumn, spreadsheetConfig.Sheet,
                 spreadsheetConfig.SpreadsheetId);
 
             await _spreadsheetService.SendCurrentDate(DateTime.Now, 3, 1, spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
-
-            var endRow = mainTableData.Count + startRow - 4;
-            var endColumn = startColumn + mainTableData.Max(x => x.Count) + 1;
             await _spreadsheetService.SendPercentsOfInsrumentsTable(percentOfInstrumentsTable, endRow, endColumn,
+                spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
+
+            await _spreadsheetService.SendDictionaryTable(dictionaryTable, startRow, endColumn,
                 spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
         }
 
-        public List<IList<object>> GetMainTableAsync(TickerInfo[] tickerInfos,
+        protected List<IList<object>> GetMainTableAsync(TickerInfo[] tickerInfos,
             int firstColumnIndex, int firstRowIndex, Dictionary<string, decimal> prices)
         {
             var result = new List<IList<object>>(tickerInfos.Length + 3)
@@ -79,7 +85,7 @@ namespace SpreadsheetExporter.Services.Implementation
             return result;
         }
 
-        public List<IList<object>> GetPercentOfInstrumentsTable(TickerInfo[] tickerInfos, Dictionary<string, decimal> prices)
+        protected List<IList<object>> GetPercentOfInstrumentsTable(TickerInfo[] tickerInfos, Dictionary<string, decimal> prices)
             =>  new List<IList<object>>().WithAction(x =>
             {
                 var sum = tickerInfos.Sum(y => prices[y.Ticker] * y.Count);
@@ -92,5 +98,79 @@ namespace SpreadsheetExporter.Services.Implementation
                     });
                 }
             });
+
+        protected List<IList<object>> GetDictionaryTable(TickerInfo[] tickerInfos,
+            int firstColumnIndex, int firstRowIndex,
+            Dictionary<string, decimal> prices, decimal currentSum,
+            PortfolioInvestmentModel portfolioInvestment)
+        {
+            var usdrub = _shareService.GetUSDRUBAsync().Result;
+
+            var portfolioSum = SpreadsheetHelper.GetCellName(firstColumnIndex + 2, firstRowIndex + 8);
+            var portfolioResultFormula = $"({SpreadsheetHelper.GetCellName(firstColumnIndex + 2, firstRowIndex + 4)}" +
+                    $"+{SpreadsheetHelper.GetCellName(firstColumnIndex + 2, firstRowIndex + 5)}" +
+                    $"+{SpreadsheetHelper.GetCellName(firstColumnIndex + 2, firstRowIndex + 6)}" +
+                    $"+{portfolioSum}" +
+                    $"-{SpreadsheetHelper.GetCellName(firstColumnIndex + 2, firstRowIndex + 7)})";
+
+            var portfolioSumNonBlocked = SpreadsheetHelper.GetCellName(firstColumnIndex + 2, firstRowIndex + 9);
+            var portfolioResultFormulaNonBlocked = $"({SpreadsheetHelper.GetCellName(firstColumnIndex + 2, firstRowIndex + 4)}" +
+                    $"+{SpreadsheetHelper.GetCellName(firstColumnIndex + 2, firstRowIndex + 5)}" +
+                    $"+{SpreadsheetHelper.GetCellName(firstColumnIndex + 2, firstRowIndex + 6)}" +
+                    $"+{portfolioSumNonBlocked}" +
+                    $"-{SpreadsheetHelper.GetCellName(firstColumnIndex + 2, firstRowIndex + 7)})";
+            var result = new List<IList<object>>
+            {
+                new[] { "Справочная информация" },
+                new List<object>
+                {
+                    "Дата", $"{DateTime.Now:d}"
+                },
+                new List<object>
+                {
+                    "Курс доллара, р", $"{usdrub:F2}"
+                },
+                new List<object>
+                {
+                    "Денежные средства, р", $"{currentSum:F2}"
+                },
+                new List<object>
+                {
+                    "Общие дивиденды и купоны, р", $"{portfolioInvestment.DividendsAndCouponsOverall}"
+                },
+                new List<object>
+                {
+                    "Общая выгода по ИИС, р", $"{portfolioInvestment.IISBonusesOverall}"
+                },
+                new List<object>
+                {
+                    "Общие внесения, р", $"{portfolioInvestment.DepositsOverall}"
+                },
+                new List<object>
+                {
+                    "Стоимость портфеля, р", $"{tickerInfos.Sum(x => prices[x.Ticker] * x.Count) + currentSum}"
+                },
+                new List<object>
+                {
+                    "Стоимость портфеля (без замороженных), р", $"{tickerInfos.Where(x => !x.IsBlocked).Sum(x => prices[x.Ticker] * x.Count) + currentSum}"
+                },
+                new List<object>
+                {
+                    "Итог портфеля, р", $"=TEXT({portfolioResultFormula};\"0.00\")" +
+                        $"&\" (\"" +
+                        $"&TEXT({portfolioResultFormula}/({portfolioSum}-{portfolioResultFormula});\"0.00%\")" +
+                        $"&\")\""
+                },
+                new List<object>
+                {
+                    "Итог портфеля (без замороженных), р", $"=TEXT({portfolioResultFormulaNonBlocked};\"0.00\")" +
+                        $"&\" (\"" +
+                        $"&TEXT({portfolioResultFormulaNonBlocked}/({portfolioSumNonBlocked}-{portfolioResultFormulaNonBlocked});\"0.00%\")" +
+                        $"&\")\""
+                },
+            };
+
+            return result;
+        }
     }
 }

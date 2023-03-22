@@ -36,6 +36,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решен
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configs", "configs", "{07DD986F-E385-43C2-92B2-F0927A22A419}"
 	ProjectSection(SolutionItems) = preProject
+		configs\portfolio-investment.json = configs\portfolio-investment.json
+		configs\replenishment.json = configs\replenishment.json
 		configs\ticker-infos.json = configs\ticker-infos.json
 		configs\tinkoff-token.json = configs\tinkoff-token.json
 	EndProjectSection

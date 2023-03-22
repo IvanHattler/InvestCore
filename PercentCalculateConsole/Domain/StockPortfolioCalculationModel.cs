@@ -21,6 +21,7 @@ namespace InvestCore.PercentCalculateConsole.Domain
                     GosBond,
                     CorpBond,
                     Gold
-                });
+                }
+                .Where(x => !TickerInfos.Select(y => y.Ticker).Contains(x.Ticker)));
     }
 }

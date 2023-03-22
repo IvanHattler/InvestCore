@@ -71,6 +71,30 @@
       "ClassCode": "TQBR"
     },
     {
+      "Ticker": "MSFT",
+      "ClassType": 0,
+      "Count": 1,
+      "TickerType": 0,
+      "ClassCode": "SPBXM",
+      "IsBlocked": true
+    },
+    {
+      "Ticker": "OZON",
+      "ClassType": 0,
+      "Count": 2,
+      "TickerType": 0,
+      "ClassCode": "TQBR",
+      "IsBlocked": true
+    },
+    {
+      "Ticker": "INTC",
+      "ClassType": 0,
+      "Count": 5,
+      "TickerType": 0,
+      "ClassCode": "SPBXM",
+      "IsBlocked": true
+    },
+    {
       "Ticker": "RU000A103WV8",
       "ClassType": 2,
       "Count": 30,
@@ -89,7 +113,7 @@
       "ClassType": 2,
       "Count": 3,
       "TickerType": 2,
-      "DefaultPrice": 1087.2,
+      "DefaultPrice": 1088.8,
       "ClassCode": "TQTF"
     },
     {
@@ -97,7 +121,7 @@
       "ClassType": 3,
       "Count": 976,
       "TickerType": 2,
-      "DefaultPrice": 14.735,
+      "DefaultPrice": 14.685,
       "ClassCode": "TQTF"
     },
     {
@@ -108,25 +132,13 @@
       "ClassCode": "TQTF"
     },
     {
-      "Ticker": "MSFT",
+      "Ticker": "SBSP",
       "ClassType": 0,
-      "Count": 1,
-      "TickerType": 0,
-      "ClassCode": "SPBXM"
-    },
-    {
-      "Ticker": "OZON",
-      "ClassType": 0,
-      "Count": 2,
-      "TickerType": 0,
-      "ClassCode": "TQBR"
-    },
-    {
-      "Ticker": "INTC",
-      "ClassType": 0,
-      "Count": 5,
-      "TickerType": 0,
-      "ClassCode": "SPBXM"
+      "Count": 17,
+      "TickerType": 2,
+      "ClassCode": "TQTF",
+      "DefaultPrice": 1719,
+      "IsBlocked": true
     }
   ]
 }

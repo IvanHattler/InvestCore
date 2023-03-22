@@ -30,16 +30,20 @@ namespace InvestCore.TinkoffApi.Services
 
         public async Task<decimal?> GetUSDRUBAsync()
         {
-            try
+            if (USDRUB == null)
             {
-                //BBG0013HGFT4 USD000UTSTOM
-                return USDRUB ??= await GetByCandles("BBG0013HGFT4")
+                try
+                {
+                    //BBG0013HGFT4 USD000UTSTOM
+                    USDRUB = await GetByCandles("BBG0013HGFT4")
                     ?? await GetClosePriceByCandles("BBG0013HGFT4");
+                }
+                finally
+                {
+                    _logger.LogInformation("Выполнен запрос к TinkoffApi");
+                }
             }
-            finally
-            {
-                _logger.LogInformation("Выполнен запрос к TinkoffApi");
-            }
+            return USDRUB;
         }
         protected async Task<IEnumerable<Share>> GetSharesAsync()
         {

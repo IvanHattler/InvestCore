@@ -7,5 +7,7 @@
         Task SendCurrentDate(DateTime dateTime, int row, int column, string sheet, string spreadsheetId);
 
         Task SendPercentsOfInsrumentsTable(List<IList<object>> table, int startRow, int startColumn, string sheet, string spreadsheetId);
+
+        Task SendDictionaryTable(List<IList<object>> table, int startRow, int startColumn, string sheet, string spreadsheetId);
     }
 }
