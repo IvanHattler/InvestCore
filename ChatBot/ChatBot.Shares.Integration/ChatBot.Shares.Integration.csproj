@@ -12,21 +12,14 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.2" />
-    <PackageReference Include="Tinkoff.InvestApi" Version="0.3.0" />
+    <PackageReference Include="Tinkoff.InvestApi" Version="0.4.1" />
     <PackageReference Include="TwelveDataSharp" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\InvestCore\InvestCore.Domain\InvestCore.Domain.csproj" />
+    <ProjectReference Include="..\..\InvestCore\InvestCore.TinkoffApi\InvestCore.TinkoffApi.csproj" />
     <ProjectReference Include="..\ChatBot.Core\ChatBot.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="InvestCore.Domain">
-      <HintPath>..\..\InvestCore\InvestCore.TinkoffApi\bin\Release\net6.0\win-x64\InvestCore.Domain.dll</HintPath>
-    </Reference>
-    <Reference Include="InvestCore.TinkoffApi">
-      <HintPath>..\..\InvestCore\InvestCore.TinkoffApi\bin\Release\net6.0\win-x64\InvestCore.TinkoffApi.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

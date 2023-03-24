@@ -8,20 +8,20 @@ namespace ChatBot.Shares.Integration.Services
     {
         public override Task<Dictionary<string, decimal>> GetCurrentOrLastPricesAsync(IEnumerable<TickerInfoBase> symbols)
         {
-            return GetPricesAsync(symbols.Select(x => (x.Ticker, x.TickerType)));
+            return GetPricesAsync(symbols);
         }
 
-        public override Task<Dictionary<string, decimal>> GetPricesAsync(IEnumerable<(string, InstrumentType)> symbols)
+        public override Task<Dictionary<string, decimal>> GetPricesAsync(IEnumerable<TickerInfoBase> tickerInfos)
         {
             var rand = new Random();
-            var res = new Dictionary<string, decimal>(symbols.Count());
+            var res = new Dictionary<string, decimal>(tickerInfos.Count());
 
-            foreach (var (symbol, _) in symbols)
+            foreach (var tickerInfo in tickerInfos)
             {
-                if (!res.ContainsKey(symbol))
+                if (!res.ContainsKey(tickerInfo.Ticker))
                 {
                     var price = (decimal)rand.Next(1, 4);
-                    res.Add(symbol, price);
+                    res.Add(tickerInfo.Ticker, price);
                 }
             }
             return Task.FromResult(res);

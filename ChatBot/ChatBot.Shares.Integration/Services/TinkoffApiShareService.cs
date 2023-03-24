@@ -2,7 +2,6 @@
 using ChatBot.Core.Services.Interfaces;
 using InvestCore.Domain.Models;
 using Microsoft.Extensions.Logging;
-using InstrumentType = InvestCore.Domain.Models.InstrumentType;
 
 namespace ChatBot.Shares.Integration.Services
 {
@@ -22,7 +21,7 @@ namespace ChatBot.Shares.Integration.Services
             return _shareService.GetCurrentOrLastPricesAsync(symbols);
         }
 
-        public override Task<Dictionary<string, decimal>> GetPricesAsync(IEnumerable<(string, InstrumentType)> symbols)
+        public override Task<Dictionary<string, decimal>> GetPricesAsync(IEnumerable<TickerInfoBase> symbols)
         {
             return _shareService.GetPricesAsync(symbols);
         }

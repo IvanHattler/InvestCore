@@ -17,9 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="InvestCore.Domain">
-      <HintPath>..\..\InvestCore\InvestCore.Domain\bin\Release\net6.0\win-x64\InvestCore.Domain.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\InvestCore\InvestCore.Domain\InvestCore.Domain.csproj" />
   </ItemGroup>
 
 </Project>

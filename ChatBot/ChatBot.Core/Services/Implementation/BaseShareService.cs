@@ -7,11 +7,16 @@ namespace ChatBot.Core.Services.Implementation
     {
         public abstract Task<Dictionary<string, decimal>> GetCurrentOrLastPricesAsync(IEnumerable<TickerInfoBase> symbols);
 
-        public abstract Task<Dictionary<string, decimal>> GetPricesAsync(IEnumerable<(string, InstrumentType)> symbols);
+        public abstract Task<Dictionary<string, decimal>> GetPricesAsync(IEnumerable<TickerInfoBase> tickerInfos);
+
+        public Task<decimal?> GetUSDRUBAsync()
+        {
+            throw new NotImplementedException();
+        }
 
         public async Task<IEnumerable<TickerInfoModel>> UpdateTickerInfosAsync(IEnumerable<TickerInfoModel> tickerInfos)
         {
-            Dictionary<string, decimal> prices = await GetPricesAsync(tickerInfos.Select(x => (x.Ticker, x.TickerType)));
+            Dictionary<string, decimal> prices = await GetPricesAsync(tickerInfos);
 
             foreach (var tickerInfo in tickerInfos)
             {
