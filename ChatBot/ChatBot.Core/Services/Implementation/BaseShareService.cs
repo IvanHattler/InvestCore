@@ -16,7 +16,7 @@ namespace ChatBot.Core.Services.Implementation
 
         public async Task<IEnumerable<TickerInfoModel>> UpdateTickerInfosAsync(IEnumerable<TickerInfoModel> tickerInfos)
         {
-            Dictionary<string, decimal> prices = await GetPricesAsync(tickerInfos);
+            Dictionary<string, decimal> prices = await GetCurrentOrLastPricesAsync(tickerInfos);
 
             foreach (var tickerInfo in tickerInfos)
             {

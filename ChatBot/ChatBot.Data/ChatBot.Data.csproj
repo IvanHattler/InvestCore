@@ -11,13 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\InvestCore\InvestCore.Domain\InvestCore.Domain.csproj" />
     <ProjectReference Include="..\ChatBot.Core\ChatBot.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="InvestCore.Domain">
-      <HintPath>..\..\InvestCore\InvestCore.Domain\bin\Release\net6.0\InvestCore.Domain.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

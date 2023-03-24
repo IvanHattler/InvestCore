@@ -18,5 +18,10 @@
             IsAdmin = isAdmin;
             TickerInfos = tickerInfos ?? throw new ArgumentNullException(nameof(tickerInfos));
         }
+
+        public UserInfo()
+        {
+
+        }
     }
 }

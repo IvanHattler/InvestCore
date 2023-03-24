@@ -24,5 +24,9 @@ namespace InvestCore.Domain.Models
             Count = count;
             TickerType = type;
         }
+        public TickerInfoModel()
+        {
+
+        }
     }
 }
