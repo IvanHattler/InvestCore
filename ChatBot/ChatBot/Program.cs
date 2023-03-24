@@ -11,7 +11,9 @@ var availableIds = configuration.GetRequiredSection("AvailableIds").Get<long[]>(
 var messageInterval = configuration.GetRequiredSection("MessageIntervalMs").Get<double>();
 var needSendMessagesOnStart = configuration.GetRequiredSection("NeedSendMessagesOnStart").Get<bool>();
 var tinkoffToken = configuration.GetRequiredSection("TinkoffToken").Get<string>();
+
 var container = AppRegistry.BuildContainer(twelveDataApiToken, telegramToken, availableIds, messageInterval, needSendMessagesOnStart, tinkoffToken);
+
 
 var initService = container.Resolve<IInitService>();
 await initService.Init();

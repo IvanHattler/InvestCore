@@ -13,7 +13,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\configs\config.json" Link="config.json">
+    <Content Include="..\..\configs\tinkoff-token.json" Link="configs\tinkoff-token.json" />
+    <Content Include="..\configs\config.json" Link="configs\config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -48,5 +49,9 @@
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="configs\" />
   </ItemGroup>
 </Project>
