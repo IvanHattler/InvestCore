@@ -31,16 +31,20 @@ namespace SpreadsheetExporter.Services.Implementation
             var prices = await _shareService.GetCurrentOrLastPricesAsync(tickerInfos);
             var mainTableData = GetMainTableAsync(tickerInfos, startColumn + 1, startRow + 1, prices);
 
-            var endRow = mainTableData.Count + startRow - 5;
             var endColumn = startColumn + mainTableData.Max(x => x.Count) + 1;
             var percentOfInstrumentsTable = GetPercentOfInstrumentsTable(tickerInfos, prices);
+
+            var minRowsCount = 22;
+            var moveToRow = Math.Max(
+                mainTableData.Count + startRow - percentOfInstrumentsTable.Count,
+                minRowsCount + startRow - percentOfInstrumentsTable.Count);
             var dictionaryTable = GetDictionaryTable(tickerInfos, endColumn, startRow, prices, replenishment.CurrentSum, portfolioInvestment);
 
             await _spreadsheetService.SendMainTableAsync(mainTableData, startRow, startColumn, spreadsheetConfig.Sheet,
-                spreadsheetConfig.SpreadsheetId);
+                spreadsheetConfig.SpreadsheetId, minRowsCount);
 
             await _spreadsheetService.SendCurrentDate(DateTime.Now, 3, 1, spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
-            await _spreadsheetService.SendPercentsOfInsrumentsTable(percentOfInstrumentsTable, endRow, endColumn,
+            await _spreadsheetService.SendPercentsOfInsrumentsTable(percentOfInstrumentsTable, moveToRow, endColumn,
                 spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
 
             await _spreadsheetService.SendDictionaryTable(dictionaryTable, startRow, endColumn,

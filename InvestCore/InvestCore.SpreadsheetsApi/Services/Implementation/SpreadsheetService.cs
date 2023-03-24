@@ -21,27 +21,31 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             _logger = logger;
         }
 
-        public async Task SendMainTableAsync(List<IList<object>> mainTableData, int startRow, int startColumn, string sheet, string spreadsheetId)
+        public async Task SendMainTableAsync(List<IList<object>> mainTableData, int startRow, int startColumn, string sheet, string spreadsheetId,
+            int minRowsCount)
         {
             var endRow = mainTableData.Count + startRow;
             var endColumn = startColumn + mainTableData.Max(x => x.Count);
 
             var sheetId = 0;
 
+            var moveToRow = Math.Max(endRow, minRowsCount + startRow);
             var getChartsRequest = _sheetsService.Spreadsheets.Get(spreadsheetId);
             var spreadsheet = await getChartsRequest.ExecuteAsync();
             var charts = spreadsheet.Sheets[0].Charts ?? Array.Empty<EmbeddedChart>();
-            var moveChartsRequests = GetMoveChartsDownRequest(charts, endRow + 2, sheetId);
+
+            //Move chart down
+            var moveChartsRequests = GetMoveChartsDownRequest(charts, moveToRow + 2, sheetId);
 
             var batchRequest = _sheetsService.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
             {
                 Requests = moveChartsRequests.Concat(new List<Request>
                 {
                     //Move all sheet down
-                    GetMoveAllSheetDownRequest(endRow + 2, sheetId),
+                    GetMoveAllSheetDownRequest(moveToRow + 2, sheetId),
 
                     //Print horizontal separator line
-                    GetSeparatorRequest(endRow + 2, sheetId),
+                    GetSeparatorRequest(moveToRow + 2, sheetId),
 
                     //Merge first cell
                     GetMergeCellsRequest(startRow, startColumn, startRow + 1, endColumn, sheetId),
@@ -189,10 +193,11 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                                     SheetId = chart.Position.OverlayPosition.AnchorCell.SheetId,
                                     RowIndex = chart.Position.OverlayPosition.AnchorCell.RowIndex + rowCount,
                                     ColumnIndex = chart.Position.OverlayPosition.AnchorCell.ColumnIndex,
-                                }
+                                },
+                                OffsetYPixels = chart.Position.OverlayPosition.OffsetYPixels,
                             }
                         },
-                        Fields = "anchorCell(rowIndex,columnIndex)"
+                        Fields = "anchorCell(rowIndex,columnIndex),offsetYPixels"
                     }
                 };
             }
