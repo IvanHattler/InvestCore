@@ -1,4 +1,5 @@
-﻿using Google.Apis.Sheets.v4;
+﻿using System;
+using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using InvestCore.SpreadsheetsApi.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -26,9 +27,15 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             var endColumn = startColumn + mainTableData.Max(x => x.Count);
 
             var sheetId = 0;
+
+            var getChartsRequest = _sheetsService.Spreadsheets.Get(spreadsheetId);
+            var spreadsheet = await getChartsRequest.ExecuteAsync();
+            var charts = spreadsheet.Sheets[0].Charts ?? Array.Empty<EmbeddedChart>();
+            var moveChartsRequests = GetMoveChartsDownRequest(charts, endRow + 2, sheetId);
+
             var batchRequest = _sheetsService.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
             {
-                Requests = new List<Request>
+                Requests = moveChartsRequests.Concat(new List<Request>
                 {
                     //Move all sheet down
                     GetMoveAllSheetDownRequest(endRow + 2, sheetId),
@@ -63,7 +70,9 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                     GetConditionalFormattingRequest(startRow + 2, endColumn - 1, endRow - 1, endColumn, sheetId),
 
                     GetAutoResizeDimensionsRequest(0, maxColumn, sheetId),
-                }
+
+                    GetPieChartForMainTableRequest(startRow + 1, startColumn, endRow - 1, startColumn + 1, sheetId, startRow, endColumn + 4),
+                }).ToList()
             }, spreadsheetId);
 
             await batchRequest.ExecuteAsync();
@@ -113,12 +122,18 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             {
                 Requests = new List<Request>
                 {
+                    GetMergeCellsRequest(startRow, startColumn, startRow + 1, endColumn, sheetId),
+                    GetFormatHorizontalAlignmentRequest(startRow, startColumn, startRow + 1, startColumn + 1, sheetId),
+                    GetUpdateBordersRequest(startRow, startColumn, startRow + 1, startColumn + 1, sheetId),
+
                     //Set format to all cells
                     GetFormatAllTextRequest(startRow, startColumn, endRow, endColumn, sheetId),
                     //Set percent format to last column
                     GetFormatNumberRequest(startRow, endColumn - 1 , endRow, endColumn, sheetId),
+
                     //Set border to all cells
                     GetUpdateBordersRequest(startRow, startColumn, endRow, endColumn, sheetId),
+                    GetPieChartForPercentsTableRequest(startRow + 1, startColumn, endRow, startColumn + 1, sheetId, startRow, endColumn + 1),
                 }
             }, spreadsheetId);
 
@@ -138,15 +153,13 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             {
                 Requests = new List<Request>
                 {
-                    //Merge first cell
                     GetMergeCellsRequest(startRow, startColumn, startRow + 1, endColumn, sheetId),
                     GetFormatHorizontalAlignmentRequest(startRow, startColumn, startRow + 1, startColumn + 1, sheetId),
-                    GetFormatHorizontalAlignmentRequest(endRow - 2, endColumn - 1, endRow, endColumn, sheetId, "RIGHT"),
-                    //Set format to all cells
-                    GetFormatAllTextRequest(startRow, startColumn, endRow, endColumn, sheetId),
-                    //Set border to all cells
-                    GetUpdateBordersRequest(startRow, startColumn, endRow, endColumn, sheetId),
                     GetUpdateBordersRequest(startRow, startColumn, startRow + 1, startColumn + 1, sheetId),
+
+                    GetFormatHorizontalAlignmentRequest(endRow - 2, endColumn - 1, endRow, endColumn, sheetId, "RIGHT"),
+                    GetFormatAllTextRequest(startRow, startColumn, endRow, endColumn, sheetId),
+                    GetUpdateBordersRequest(startRow, startColumn, endRow, endColumn, sheetId),
                 }
             }, spreadsheetId);
 
@@ -158,57 +171,186 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
 
         #region Private methods
 
-        //private static Request GetChartRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
-        //{
-        //    return new Request()
-        //    {
-        //        AddChart = new AddChartRequest()
-        //        {
-        //            Chart = new EmbeddedChart()
-        //            {
-        //                Spec = new ChartSpec()
-        //                {
-        //                    AltText = "Доли портфеля",
-        //                    BackgroundColorStyle = new ColorStyle()
-        //                    {
-        //                        RgbColor = SpreadsheetHelper.White,
-        //                    },
-        //                    Title = "Доли портфеля",
-        //                    PieChart = new PieChartSpec()
-        //                    {
-        //                        PieHole = 0,
-        //                        LegendPosition = "TOP_LEGEND",
-        //                        ThreeDimensional = false,
+        private static IEnumerable<Request> GetMoveChartsDownRequest(IList<EmbeddedChart> charts, int rowCount, int sheetId)
+        {
+            foreach (var chart in charts)
+            {
+                yield return new Request()
+                {
+                    UpdateEmbeddedObjectPosition = new UpdateEmbeddedObjectPositionRequest()
+                    {
+                        ObjectId = chart.ChartId,
+                        NewPosition = new EmbeddedObjectPosition()
+                        {
+                            OverlayPosition = new OverlayPosition()
+                            {
+                                AnchorCell = new GridCoordinate()
+                                {
+                                    SheetId = chart.Position.OverlayPosition.AnchorCell.SheetId,
+                                    RowIndex = chart.Position.OverlayPosition.AnchorCell.RowIndex + rowCount,
+                                    ColumnIndex = chart.Position.OverlayPosition.AnchorCell.ColumnIndex,
+                                }
+                            }
+                        },
+                        Fields = "anchorCell(rowIndex,columnIndex)"
+                    }
+                };
+            }
+        }
 
-        //                    }
-        //                },
-        //                Position = new EmbeddedObjectPosition()
-        //                {
-        //                    SheetId = sheetId,
-        //                    NewSheet = false,
-        //                    OverlayPosition = new OverlayPosition()
-        //                    {
-        //                        AnchorCell = new GridCoordinate()
-        //                        {
-        //                            SheetId = sheetId,
-        //                            RowIndex = startRow,
-        //                            ColumnIndex = startColumn,
-        //                        },
-        //                        WidthPixels = 500,
-        //                        HeightPixels = 350,
-        //                    }
-        //                },
-        //                Border = new EmbeddedObjectBorder()
-        //                {
-        //                    ColorStyle = new ColorStyle()
-        //                    {
-        //                        RgbColor = SpreadsheetHelper.Black,
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    };
-        //}
+        private static Request GetPieChartForMainTableRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId,
+            int chartRow, int chartColumn)
+        {
+            return new Request()
+            {
+                AddChart = new AddChartRequest()
+                {
+                    Chart = new EmbeddedChart()
+                    {
+                        Spec = new ChartSpec()
+                        {
+                            TitleTextPosition = new TextPosition()
+                            {
+                                HorizontalAlignment = "CENTER"
+                            },
+                            AltText = "Доли портфеля",
+                            Title = "Доли портфеля",
+                            PieChart = new PieChartSpec()
+                            {
+                                PieHole = 0,
+                                LegendPosition = "LABELED_LEGEND",
+                                ThreeDimensional = true,
+                                Domain = new ChartData()
+                                {
+                                    SourceRange = new ChartSourceRange()
+                                    {
+                                        Sources = new List<GridRange>()
+                                        {
+                                            new GridRange()
+                                            {
+                                                SheetId = sheetId,
+                                                StartRowIndex = startRow,
+                                                EndRowIndex = endRow,
+                                                StartColumnIndex = startColumn,
+                                                EndColumnIndex = endColumn,
+                                            }
+                                        }
+                                    }
+                                },
+                                Series = new ChartData()
+                                {
+                                    SourceRange = new ChartSourceRange()
+                                    {
+                                        Sources = new List<GridRange>()
+                                        {
+                                            new GridRange()
+                                            {
+                                                SheetId = sheetId,
+                                                StartRowIndex = startRow,
+                                                EndRowIndex = endRow,
+                                                StartColumnIndex = startColumn + 4,
+                                                EndColumnIndex = endColumn + 4,
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        Position = new EmbeddedObjectPosition()
+                        {
+                            OverlayPosition = new OverlayPosition()
+                            {
+                                AnchorCell = new GridCoordinate()
+                                {
+                                    SheetId = sheetId,
+                                    RowIndex = chartRow,
+                                    ColumnIndex = chartColumn,
+                                },
+                                WidthPixels = 500,
+                                HeightPixels = 350,
+                            }
+                        }
+                    }
+                }
+            };
+        }
+
+        private static Request GetPieChartForPercentsTableRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId,
+            int chartRow, int chartColumn)
+        {
+            return new Request()
+            {
+                AddChart = new AddChartRequest()
+                {
+                    Chart = new EmbeddedChart()
+                    {
+                        Spec = new ChartSpec()
+                        {
+                            TitleTextPosition = new TextPosition()
+                            {
+                                HorizontalAlignment = "CENTER"
+                            },
+                            AltText = "Доли портфеля по классам активов",
+                            Title = "Доли портфеля по классам активов",
+                            PieChart = new PieChartSpec()
+                            {
+                                PieHole = 0,
+                                LegendPosition = "LABELED_LEGEND",
+                                ThreeDimensional = true,
+                                Domain = new ChartData()
+                                {
+                                    SourceRange = new ChartSourceRange()
+                                    {
+                                        Sources = new List<GridRange>()
+                                        {
+                                            new GridRange()
+                                            {
+                                                SheetId = sheetId,
+                                                StartRowIndex = startRow,
+                                                EndRowIndex = endRow,
+                                                StartColumnIndex = startColumn,
+                                                EndColumnIndex = endColumn,
+                                            }
+                                        }
+                                    }
+                                },
+                                Series = new ChartData()
+                                {
+                                    SourceRange = new ChartSourceRange()
+                                    {
+                                        Sources = new List<GridRange>()
+                                        {
+                                            new GridRange()
+                                            {
+                                                SheetId = sheetId,
+                                                StartRowIndex = startRow,
+                                                EndRowIndex = endRow,
+                                                StartColumnIndex = startColumn + 1,
+                                                EndColumnIndex = endColumn + 1,
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        Position = new EmbeddedObjectPosition()
+                        {
+                            OverlayPosition = new OverlayPosition()
+                            {
+                                AnchorCell = new GridCoordinate()
+                                {
+                                    SheetId = sheetId,
+                                    RowIndex = chartRow,
+                                    ColumnIndex = chartColumn,
+                                },
+                                WidthPixels = 350,
+                                HeightPixels = 170,
+                            }
+                        }
+                    }
+                }
+            };
+        }
 
         private static Request GetAutoResizeDimensionsRequest(int startColumn, int endColumn, int sheetId)
         {

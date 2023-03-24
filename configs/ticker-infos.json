@@ -102,9 +102,18 @@
       "ClassCode": "TQCB"
     },
     {
+      "Ticker": "SBSP",
+      "ClassType": 0,
+      "Count": 17,
+      "TickerType": 2,
+      "ClassCode": "TQTF",
+      "DefaultPrice": 1719,
+      "IsBlocked": true
+    },
+    {
       "Ticker": "SBMX",
       "ClassType": 0,
-      "Count": 5595,
+      "Count": 5785,
       "TickerType": 2,
       "ClassCode": "TQTF"
     },
@@ -113,32 +122,23 @@
       "ClassType": 2,
       "Count": 3,
       "TickerType": 2,
-      "DefaultPrice": 1088.8,
+      "DefaultPrice": 1089,
       "ClassCode": "TQTF"
     },
     {
       "Ticker": "SBGD",
       "ClassType": 3,
-      "Count": 976,
+      "Count": 1316,
       "TickerType": 2,
-      "DefaultPrice": 14.685,
+      "DefaultPrice": 14.59,
       "ClassCode": "TQTF"
     },
     {
       "Ticker": "SBGB",
       "ClassType": 1,
-      "Count": 2172,
+      "Count": 3606,
       "TickerType": 2,
       "ClassCode": "TQTF"
-    },
-    {
-      "Ticker": "SBSP",
-      "ClassType": 0,
-      "Count": 17,
-      "TickerType": 2,
-      "ClassCode": "TQTF",
-      "DefaultPrice": 1719,
-      "IsBlocked": true
     }
   ]
 }
