@@ -12,7 +12,7 @@ namespace InvestCore.TinkoffApi.Domain
         /// <summary>
         /// Номинал. Только для облигаций
         /// </summary>
-        public MoneyValue? Nominal { get; set; }
+        public decimal? Nominal { get; set; }
 
         public string Currency { get; set; } = "rub";
     }

@@ -193,14 +193,14 @@ namespace InvestCore.TinkoffApi.Services
             {
                 try
                 {
-                    var figiAndNominal = await GetDataForPrice(tickerInfo.Ticker, tickerInfo.TickerType, tickerInfo.ClassCode);
+                    var dataForPrice = await GetDataForPrice(tickerInfo.Ticker, tickerInfo.TickerType, tickerInfo.ClassCode);
                     res.Add(new SymbolModel()
                     {
                         Symbol = tickerInfo.Ticker,
                         Type = tickerInfo.TickerType,
-                        Figi = figiAndNominal.Item1,
-                        Nominal = figiAndNominal.Item2,
-                        Currency = figiAndNominal.Item3,
+                        Figi = dataForPrice.Item1,
+                        Nominal = dataForPrice.Item2,
+                        Currency = dataForPrice.Item3,
                     });
                 }
                 catch (InstrumentNotFoundException e)
@@ -223,7 +223,7 @@ namespace InvestCore.TinkoffApi.Services
             return res;
         }
 
-        private async Task<(string, MoneyValue?, string)> GetDataForPrice(string ticker, InstrumentType type, string classCode)
+        private async Task<(string, decimal?, string)> GetDataForPrice(string ticker, InstrumentType type, string classCode)
         {
             switch (type)
             {
@@ -329,7 +329,8 @@ namespace InvestCore.TinkoffApi.Services
                     case InstrumentType.Etf:
                         {
                             return await GetByCandles(model.Figi)
-                                ?? await GetClosePriceByCandles(model.Figi);
+                                ?? await GetClosePriceByCandles(model.Figi)
+                                ?? await GetClosePrice(model.Figi);
                         }
                     case InstrumentType.Bond:
                         {
@@ -337,12 +338,13 @@ namespace InvestCore.TinkoffApi.Services
                                 return null;
 
                             var price = await GetByCandles(model.Figi)
-                                ?? await GetClosePriceByCandles(model.Figi);
+                                ?? await GetClosePriceByCandles(model.Figi)
+                                ?? await GetClosePrice(model.Figi);
 
                             if (price == null)
                                 return null;
 
-                            return await CalculateBondPrice(model.Figi, model.Nominal, price.Value);
+                            return await CalculateBondPrice(model.Figi, model.Nominal.Value, price.Value);
                         }
                     default:
                         throw new NotImplementedException();
@@ -354,7 +356,7 @@ namespace InvestCore.TinkoffApi.Services
             }
         }
 
-        private async Task<decimal?> CalculateBondPrice(string figi, MoneyValue nominal, decimal price)
+        private async Task<decimal?> CalculateBondPrice(string figi, decimal nominal, decimal price)
         {
             var accruedInterests = (await _investApiClient.Instruments.GetAccruedInterestsAsync(new GetAccruedInterestsRequest
             {
@@ -377,11 +379,12 @@ namespace InvestCore.TinkoffApi.Services
             {
                 From = DateTime.UtcNow.AddMinutes(-10).ToTimestamp(),
                 To = DateTime.UtcNow.ToUniversalTime().ToTimestamp(),
-                Figi = figi,
+                InstrumentId = figi,
                 Interval = CandleInterval._1Min,
             });
 
-            var lastCandle = response.Candles
+            var lastCandle = response
+                .Candles
                 .OrderBy(x => x.Time)
                 .LastOrDefault();
 
@@ -402,11 +405,12 @@ namespace InvestCore.TinkoffApi.Services
             {
                 From = DateTime.UtcNow.AddDays(-3).ToTimestamp(),
                 To = DateTime.UtcNow.ToUniversalTime().ToTimestamp(),
-                Figi = figi,
+                InstrumentId = figi,
                 Interval = CandleInterval.Day,
             });
 
-            var lastCandle = response.Candles
+            var lastCandle = response
+                .Candles
                 .OrderBy(x => x.Time)
                 .LastOrDefault();
 
@@ -414,6 +418,19 @@ namespace InvestCore.TinkoffApi.Services
                 return lastCandle.Close;
 
             return null;
+        }
+
+        private async Task<decimal?> GetClosePrice(string figi)
+        {
+            var request = new GetClosePricesRequest();
+            request.Instruments.Add(new InstrumentClosePriceRequest() { InstrumentId = figi });
+
+            var response = await _investApiClient.MarketData.GetClosePricesAsync(request);
+
+            return response
+                .ClosePrices
+                .First()
+                .Price;
         }
     }
 }
