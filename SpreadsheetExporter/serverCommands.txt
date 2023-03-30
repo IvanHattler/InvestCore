@@ -12,7 +12,7 @@ sudo apt update
 sudo apt install cron
 sudo systemctl enable cron
 
-0 10,14,18,22 * * MON,TUE,WED,THU,FRI /usr/bin/SpreadsheetExporterLinux64/start.sh >> /usr/bin/SpreadsheetExporterLinux64/configs/file.log
+0 10,14,18,22 * * MON,TUE,WED,THU,FRI /usr/bin/SpreadsheetExporterLinux64/start.sh
 
 
 /etc/init.d/cron restart
