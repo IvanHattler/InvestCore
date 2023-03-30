@@ -1,4 +1,5 @@
-﻿using InvestCore.Domain.Models;
+﻿using InvestCore.Domain.Helpers;
+using InvestCore.Domain.Models;
 using InvestCore.Domain.Services.Interfaces;
 using InvestCore.SpreadsheetsApi;
 using InvestCore.SpreadsheetsApi.Services.Interfaces;
@@ -43,7 +44,7 @@ namespace SpreadsheetExporter.Services.Implementation
             await _spreadsheetService.SendMainTableAsync(mainTableData, startRow, startColumn, spreadsheetConfig.Sheet,
                 spreadsheetConfig.SpreadsheetId, minRowsCount);
 
-            await _spreadsheetService.SendCurrentDate(DateTime.Now, 3, 1, spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
+            await _spreadsheetService.SendCurrentDate(DateTimeHelper.GetUTCPlus4DateTime(), 3, 1, spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
             await _spreadsheetService.SendPercentsOfInsrumentsTable(percentOfInstrumentsTable, moveToRow, endColumn,
                 spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
 
