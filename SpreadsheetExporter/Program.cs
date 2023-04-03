@@ -29,7 +29,7 @@ if (needStartOneTime)
 
     var container = AppRegistry.BuildContainer(telegramToken, spreadsheetConfig);
     var logger = container.Resolve<ILogger>();
-    logger.LogInformation("Начало обработки: {datetime}", DateTimeHelper.GetUTCPlus4DateTime());
+    logger.LogInformation("Start processing: {datetime}", DateTimeHelper.GetUTCPlus4DateTime());
 
     try
     {
@@ -39,11 +39,11 @@ if (needStartOneTime)
             .UpdateTableAsync(tickerInfos, spreadsheetConfig, replenisment, portfolioInvestment)
             .Wait();
 
-        logger.LogInformation("Окончание обработки: {datetime}", DateTimeHelper.GetUTCPlus4DateTime());
+        logger.LogInformation("End processing: {datetime}", DateTimeHelper.GetUTCPlus4DateTime());
     }
     catch (Exception e)
     {
-        logger.LogError(e, "Возникло исключение");
+        logger.LogError(e, "An exception occured");
     }
 }
 else
@@ -67,16 +67,18 @@ else
         var container = AppRegistry.BuildContainer(telegramToken, spreadsheetConfig);
 
 
+        var logger = container.Resolve<ILogger>();
+        logger.LogInformation("Start processing: {datetime}", DateTimeHelper.GetUTCPlus4DateTime());
         var workflowService = container.Resolve<IWorkflowService>();
 
-        var logger = container.Resolve<ILogger>();
         await workflowService
             .UpdateTableAsync(tickerInfos, spreadsheetConfig, replenisment, portfolioInvestment);
-        logger.LogInformation("---------------------Окончание обработки---------------------");
+
+        logger.LogInformation("End processing: {datetime}", DateTimeHelper.GetUTCPlus4DateTime());
     });
 #pragma warning restore AsyncFixer03 // Fire-and-forget async-void methods or delegates
 
-    Console.WriteLine($"Таймер запущен с интервалом {intevalMs / 1000} сек.");
+    Console.WriteLine($"Timer started with interval {intevalMs / 1000} s.");
     var timer = new Timer(callback, null, 0, intevalMs);
     Console.ReadLine();
 }

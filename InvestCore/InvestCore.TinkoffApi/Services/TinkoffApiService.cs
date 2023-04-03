@@ -39,7 +39,7 @@ namespace InvestCore.TinkoffApi.Services
                 }
                 finally
                 {
-                    _logger.LogInformation("Выполнен запрос к TinkoffApi");
+                    LogRequestCompleted();
                 }
             }
             return USDRUB;
@@ -55,7 +55,7 @@ namespace InvestCore.TinkoffApi.Services
                 }
                 finally
                 {
-                    _logger.LogInformation("Выполнен запрос к TinkoffApi");
+                    LogRequestCompleted();
                 }
             }
             return Shares;
@@ -71,7 +71,7 @@ namespace InvestCore.TinkoffApi.Services
                 }
                 finally
                 {
-                    _logger.LogInformation("Выполнен запрос к TinkoffApi");
+                    LogRequestCompleted();
                 }
             }
             return Bonds;
@@ -87,7 +87,7 @@ namespace InvestCore.TinkoffApi.Services
                 }
                 finally
                 {
-                    _logger.LogInformation("Выполнен запрос к TinkoffApi");
+                    LogRequestCompleted();
                 }
             }
             return Etfs;
@@ -315,7 +315,7 @@ namespace InvestCore.TinkoffApi.Services
             }
             finally
             {
-                _logger.LogInformation("Выполнен запрос к TinkoffApi");
+                LogRequestCompleted();
             }
         }
 
@@ -352,8 +352,13 @@ namespace InvestCore.TinkoffApi.Services
             }
             finally
             {
-                _logger.LogInformation("Выполнен запрос к TinkoffApi");
+                LogRequestCompleted();
             }
+        }
+
+        private void LogRequestCompleted()
+        {
+            _logger.LogInformation("TinkoffApi request completed");
         }
 
         private async Task<decimal?> CalculateBondPrice(string figi, decimal nominal, decimal price)
