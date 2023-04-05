@@ -112,11 +112,11 @@ namespace InvestCore.TinkoffApi.Services
             {
                 if (e.StatusCode == StatusCode.Unauthenticated)
                 {
-                    _logger.LogCritical("Tinkoff token is irrelevant");
+                    _logger.LogError("Tinkoff token is irrelevant");
                 }
                 if (e.StatusCode == StatusCode.NotFound)
                 {
-                    _logger.LogCritical("Ticker not found");
+                    _logger.LogWarning("Ticker not found");
                 }
             }
 
@@ -144,17 +144,17 @@ namespace InvestCore.TinkoffApi.Services
                 }
                 catch (InstrumentNotFoundException e)
                 {
-                    _logger.LogCritical("Ticker {ticker} not found", e.Message);
+                    _logger.LogWarning("Ticker {ticker} not found", e.Message);
                 }
                 catch (RpcException e)
                 {
                     if (e.StatusCode == StatusCode.Unauthenticated)
                     {
-                        _logger.LogCritical("Tinkoff token is irrelevant");
+                        _logger.LogError("Tinkoff token is irrelevant");
                     }
                     if (e.StatusCode == StatusCode.NotFound)
                     {
-                        _logger.LogCritical("Ticker {ticker} not found", symbolModel.Symbol);
+                        _logger.LogWarning("Ticker {ticker} not found", symbolModel.Symbol);
                     }
                 }
             }
@@ -205,17 +205,17 @@ namespace InvestCore.TinkoffApi.Services
                 }
                 catch (InstrumentNotFoundException e)
                 {
-                    _logger.LogCritical("Ticker {ticker} not found", e.Message);
+                    _logger.LogWarning("Ticker {ticker} not found", e.Message);
                 }
                 catch (RpcException e)
                 {
                     if (e.StatusCode == StatusCode.Unauthenticated)
                     {
-                        _logger.LogCritical("Tinkoff token is irrelevant");
+                        _logger.LogError("Tinkoff token is irrelevant");
                     }
                     if (e.StatusCode == StatusCode.NotFound)
                     {
-                        _logger.LogCritical("Ticker {ticker} not found", tickerInfo.Ticker);
+                        _logger.LogWarning("Ticker {ticker} not found", tickerInfo.Ticker);
                     }
                 }
             }

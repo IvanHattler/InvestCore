@@ -31,7 +31,7 @@ namespace PercentCalculateConsole.IoC
                 .Build();
         }
 
-        public static IContainer BuildContainer(string tinkoffToken, SpreadsheetConfig spreadsheetConfig)
+        public static IContainer BuildContainer(string tinkoffToken, LogLevel minimumLogLevel, SpreadsheetConfig spreadsheetConfig)
         {
             var builder = new ContainerBuilder();
 
@@ -42,6 +42,7 @@ namespace PercentCalculateConsole.IoC
                 {
                     x.AddConsole();
                     x.AddDebug();
+                    x.SetMinimumLevel(minimumLogLevel);
                 }).CreateLogger<ILogger>())
                 .SingleInstance().As<ILogger>();
 

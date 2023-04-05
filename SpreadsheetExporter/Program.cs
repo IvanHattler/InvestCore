@@ -27,7 +27,7 @@ if (needStartOneTime)
     var portfolioInvestment = configuration.GetRequiredSection("PortfolioInvestment").Get<PortfolioInvestmentModel>()
         ?? new PortfolioInvestmentModel();
 
-    var container = AppRegistry.BuildContainer(telegramToken, spreadsheetConfig);
+    var container = AppRegistry.BuildContainer(telegramToken, LogLevel.Warning, spreadsheetConfig);
     var logger = container.Resolve<ILogger>();
     logger.LogInformation("Start processing: {datetime}", DateTimeHelper.GetUTCPlus4DateTime());
 
@@ -64,7 +64,7 @@ else
         var portfolioInvestment = configuration.GetRequiredSection("PortfolioInvestment").Get<PortfolioInvestmentModel>()
             ?? new PortfolioInvestmentModel();
 
-        var container = AppRegistry.BuildContainer(telegramToken, spreadsheetConfig);
+        var container = AppRegistry.BuildContainer(telegramToken, LogLevel.Warning, spreadsheetConfig);
 
 
         var logger = container.Resolve<ILogger>();
