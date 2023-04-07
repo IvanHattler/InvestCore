@@ -85,19 +85,6 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
 
         public async Task SendCurrentDate(DateTime dateTime, int row, int column, string sheet, string spreadsheetId)
         {
-            var sheetId = 0;
-            var batchRequest = _sheetsService.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
-            {
-                Requests = new List<Request>
-                {
-                    GetFormatAllTextRequest(row - 1, column - 1, row, column, sheetId),
-                    GetFormatHorizontalAlignmentRequest(row - 1, column - 1, row, column, sheetId),
-                }
-            }, spreadsheetId);
-
-            await batchRequest.ExecuteAsync();
-            _logger.LogInformation("Current date style applied");
-
             var valueRange = new ValueRange
             {
                 Values = new List<IList<object>>
@@ -112,12 +99,27 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
 
             await updateRequest.ExecuteAsync();
             _logger.LogInformation("Send current date value to range: {range}", range);
+
+            var sheetId = 0;
+            var batchRequest = _sheetsService.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
+            {
+                Requests = new List<Request>
+                {
+                    GetFormatAllTextRequest(row - 1, column - 1, row, column, sheetId),
+                    GetFormatHorizontalAlignmentRequest(row - 1, column - 1, row, column, sheetId),
+                }
+            }, spreadsheetId);
+
+            await batchRequest.ExecuteAsync();
+            _logger.LogInformation("Current date style applied");
         }
 
         public async Task SendPercentsOfInsrumentsTable(List<IList<object>> table, int startRow, int startColumn, string sheet, string spreadsheetId)
         {
             var endRow = table.Count + startRow;
             var endColumn = startColumn + table.Max(x => x.Count);
+
+            await SetTableValues(table, startRow, startColumn, sheet, spreadsheetId, endRow, endColumn);
 
             var sheetId = 0;
             var batchRequest = _sheetsService.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
@@ -141,14 +143,14 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
 
             await batchRequest.ExecuteAsync();
             _logger.LogInformation("Percents of instruments table style applied");
-
-            await SetTableValues(table, startRow, startColumn, sheet, spreadsheetId, endRow, endColumn);
         }
 
         public async Task SendDictionaryTable(List<IList<object>> table, int startRow, int startColumn, string sheet, string spreadsheetId)
         {
             var endRow = table.Count + startRow;
             var endColumn = startColumn + table.Max(x => x.Count);
+
+            await SetTableValues(table, startRow, startColumn, sheet, spreadsheetId, endRow, endColumn);
 
             var sheetId = 0;
             var batchRequest = _sheetsService.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
@@ -169,8 +171,6 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
 
             await batchRequest.ExecuteAsync();
             _logger.LogInformation("Dictionary table style applied");
-
-            await SetTableValues(table, startRow, startColumn, sheet, spreadsheetId, endRow, endColumn);
         }
 
         #region Private methods
