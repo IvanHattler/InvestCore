@@ -2,7 +2,5 @@
   "SpreadsheetConfig": {
     "Sheet": "Лог портфеля",
     "SpreadsheetId": "1gJCuAj-0m3xOI2Z0-Sa1YBfQMNaMXIC70UjV_42HfTg"
-  },
-  "IntervalMs": 30000,
-  "NeedStartOneTime": true
+  }
 }

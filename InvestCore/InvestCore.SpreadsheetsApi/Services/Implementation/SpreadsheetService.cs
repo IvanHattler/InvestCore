@@ -73,8 +73,6 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                     //Add conditional percent formatting
                     GetConditionalFormattingRequest(startRow + 2, endColumn - 1, endRow - 1, endColumn, sheetId),
 
-                    GetAutoResizeDimensionsRequest(0, maxColumn, sheetId),
-
                     GetPieChartForMainTableRequest(startRow + 1, startColumn, endRow - 1, startColumn + 1, sheetId, startRow, endColumn + 4),
                 }).ToList()
             }, spreadsheetId);
@@ -164,6 +162,8 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                     GetFormatHorizontalAlignmentRequest(endRow - 2, endColumn - 1, endRow, endColumn, sheetId, "RIGHT"),
                     GetFormatAllTextRequest(startRow, startColumn, endRow, endColumn, sheetId),
                     GetUpdateBordersRequest(startRow, startColumn, endRow, endColumn, sheetId),
+
+                    GetAutoResizeDimensionsRequest(0, maxColumn, sheetId),
                 }
             }, spreadsheetId);
 
