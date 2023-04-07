@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using PercentCalculateConsole.IoC;
 using SpreadsheetExporter.Domain;
 using SpreadsheetExporter.Services.Interfaces;
-using Timer = System.Threading.Timer;
 
 CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("ru-RU");
 CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("ru-RU");
@@ -24,7 +23,7 @@ var replenisment = configuration.GetRequiredSection("Replenishment").Get<Repleni
 var portfolioInvestment = configuration.GetRequiredSection("PortfolioInvestment").Get<PortfolioInvestmentModel>()
     ?? new PortfolioInvestmentModel();
 
-var container = AppRegistry.BuildContainer(telegramToken, LogLevel.Warning, spreadsheetConfig);
+var container = AppRegistry.BuildContainer(telegramToken, EnvironmentHelper.IsDebug ? LogLevel.Trace : LogLevel.Warning, spreadsheetConfig);
 var logger = container.Resolve<ILogger>();
 
 try
