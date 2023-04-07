@@ -153,6 +153,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             await SetTableValues(table, startRow, startColumn, sheet, spreadsheetId, endRow, endColumn);
 
             var sheetId = 0;
+            var conditionalRequest = GetPortfolioResultConditionalFormatRequest(endRow - 2, endColumn - 1, endRow, endColumn, sheetId);
             var batchRequest = _sheetsService.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
             {
                 Requests = new List<Request>
@@ -167,6 +168,8 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
 
                     GetAutoResizeDimensionsRequest(0, maxColumn, sheetId),
                 }
+                .Concat(conditionalRequest)
+                .ToList()
             }, spreadsheetId);
 
             await batchRequest.ExecuteAsync();
@@ -174,6 +177,87 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
         }
 
         #region Private methods
+        private static Request[] GetPortfolioResultConditionalFormatRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
+        {
+            List<GridRange> gridRanges = new List<GridRange>()
+            {
+                new GridRange()
+                {
+                    SheetId = sheetId,
+                    StartRowIndex = startRow,
+                    StartColumnIndex = startColumn,
+                    EndColumnIndex = endColumn,
+                    EndRowIndex = endRow,
+                }
+            };
+
+            return new Request[2]
+            {
+                new Request()
+                {
+                    AddConditionalFormatRule = new AddConditionalFormatRuleRequest()
+                    {
+                        Rule = new ConditionalFormatRule()
+                        {
+                            Ranges = gridRanges,
+                            BooleanRule = new BooleanRule()
+                            {
+                                Condition = new BooleanCondition()
+                                {
+                                    Type = "TEXT_CONTAINS",
+                                    Values = new List<ConditionValue>
+                                    {
+                                        new ConditionValue()
+                                        {
+                                            UserEnteredValue = "-"
+                                        }
+                                    }
+                                },
+                                Format = new CellFormat()
+                                {
+                                    TextFormat = new TextFormat()
+                                    {
+                                        ForegroundColor = SpreadsheetHelper.Red,
+                                    }
+                                },
+                            }
+                        }
+                    }
+                },
+                new Request()
+                {
+                    AddConditionalFormatRule = new AddConditionalFormatRuleRequest()
+                    {
+                        Rule = new ConditionalFormatRule()
+                        {
+                            Ranges = gridRanges,
+                            BooleanRule = new BooleanRule()
+                            {
+                                Condition = new BooleanCondition()
+                                {
+                                    Type = "TEXT_NOT_CONTAINS",
+                                    Values = new List<ConditionValue>
+                                    {
+                                        new ConditionValue()
+                                        {
+                                            UserEnteredValue = "-"
+                                        }
+                                    }
+                                },
+                                Format = new CellFormat()
+                                {
+                                    TextFormat = new TextFormat()
+                                    {
+                                        ForegroundColor = SpreadsheetHelper.Green,
+                                    }
+                                },
+                            }
+                        }
+                    }
+                },
+            };
+        }
+
 
         private static IEnumerable<Request> GetMoveChartsDownRequest(IList<EmbeddedChart> charts, int rowCount, int sheetId)
         {
