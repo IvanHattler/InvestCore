@@ -13,7 +13,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
         private readonly ILogger _logger;
 
         private const int maxColumn = 100;
-        private const int maxRow = 10000;
+        private const int maxRow = 1_000_000;
 
         public SpreadsheetService(SheetsService sheetsService, ILogger logger)
         {
