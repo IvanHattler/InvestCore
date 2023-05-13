@@ -1,0 +1,25 @@
+<h1>Ticker prices</h1>
+
+<table border="2" class='table table-striped' aria-labelledby="tableLabel" *ngIf="tickerInfos">
+  <thead class="thead-dark">
+    <tr>
+      <th>Ticker</th>
+      <th>TickerType</th>
+      <th>ClassCode</th>
+      <th>Price</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let tickerInfo of tickerInfos">
+      <td>{{ tickerInfo.Ticker }}</td>
+      <td>{{ InstrumentType[tickerInfo.TickerType] }}</td>
+      <td>{{ tickerInfo.ClassCode }}</td>
+      <td>{{ tickerPrices.get(tickerInfo.Ticker) }}</td>
+      <td><button class="btn btn-success btn-sm" (click)="loadPrice(tickerInfo)">Load price</button></td>
+    </tr>
+  </tbody>
+</table>
+<!--<button class="btn btn-success btn-sm">New</button>-->
+
+<button class="btn btn-success btn-sm" (click)="loadPrices()">Load prices</button>

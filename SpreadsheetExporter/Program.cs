@@ -12,8 +12,8 @@ CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("ru-RU");
 CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("ru-RU");
 var configuration = AppRegistry.BuildConfig();
 
-var telegramToken = configuration.GetRequiredSection("TinkoffToken").Get<string>()
-        ?? string.Empty;
+var tinkoffToken = configuration.GetRequiredSection("TinkoffToken").Get<string>()
+    ?? string.Empty;
 var spreadsheetConfig = configuration.GetRequiredSection("SpreadsheetConfig").Get<SpreadsheetConfig>()
     ?? new SpreadsheetConfig();
 var tickerInfos = configuration.GetRequiredSection("TickerInfos").Get<TickerInfo[]>()
@@ -23,7 +23,7 @@ var replenisment = configuration.GetRequiredSection("Replenishment").Get<Repleni
 var portfolioInvestment = configuration.GetRequiredSection("PortfolioInvestment").Get<PortfolioInvestmentModel>()
     ?? new PortfolioInvestmentModel();
 
-var container = AppRegistry.BuildContainer(telegramToken, EnvironmentHelper.IsDebug ? LogLevel.Trace : LogLevel.Warning, spreadsheetConfig);
+var container = AppRegistry.BuildContainer(tinkoffToken, EnvironmentHelper.IsDebug ? LogLevel.Trace : LogLevel.Warning, spreadsheetConfig);
 var logger = container.Resolve<ILogger>();
 
 try
