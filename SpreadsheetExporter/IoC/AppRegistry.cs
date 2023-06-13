@@ -7,6 +7,7 @@ using InvestCore.Domain.Services.Interfaces;
 using InvestCore.SpreadsheetsApi.Services.Implementation;
 using InvestCore.SpreadsheetsApi.Services.Interfaces;
 using InvestCore.TinkoffApi.Services;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadsheetExporter.Domain;
@@ -35,7 +36,7 @@ namespace PercentCalculateConsole.IoC
         {
             var builder = new ContainerBuilder();
 
-            #region Logger
+            #region Infrastructure
 
             builder.Register(c =>
                 LoggerFactory.Create(x =>
@@ -45,8 +46,9 @@ namespace PercentCalculateConsole.IoC
                     x.SetMinimumLevel(minimumLogLevel);
                 }).CreateLogger<ILogger>())
                 .SingleInstance().As<ILogger>();
+            builder.Register(c => new MemoryCache(new MemoryCacheOptions())).SingleInstance().As<IMemoryCache>();
 
-            #endregion Logger
+            #endregion Infrastructure
 
             #region Services
 

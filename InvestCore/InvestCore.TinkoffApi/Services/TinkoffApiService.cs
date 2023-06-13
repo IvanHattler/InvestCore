@@ -4,9 +4,11 @@ using InvestCore.Domain.Models;
 using InvestCore.Domain.Services.Interfaces;
 using InvestCore.TinkoffApi.Domain;
 using InvestCore.TinkoffApi.Infrastructure;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Tinkoff.InvestApi;
 using Tinkoff.InvestApi.V1;
+using static Grpc.Core.Metadata;
 using InstrumentType = InvestCore.Domain.Models.InstrumentType;
 
 namespace InvestCore.TinkoffApi.Services
@@ -15,16 +17,19 @@ namespace InvestCore.TinkoffApi.Services
     {
         private readonly InvestApiClient _investApiClient;
         private readonly ILogger _logger;
+        private readonly IMemoryCache _memoryCache;
         private const string Usd = "usd";
         private decimal? USDRUB;
         private IEnumerable<Share> Shares;
         private IEnumerable<Bond> Bonds;
         private IEnumerable<Etf> Etfs;
+        private TimeSpan cacheTime = TimeSpan.FromMinutes(5);
 
-        public TinkoffApiService(InvestApiClient investApiClient, ILogger logger)
+        public TinkoffApiService(InvestApiClient investApiClient, ILogger logger, IMemoryCache memoryCache)
         {
             _investApiClient = investApiClient;
             _logger = logger;
+            _memoryCache = memoryCache;
         }
 
         public async Task<decimal?> GetUSDRUBAsync()
@@ -35,7 +40,7 @@ namespace InvestCore.TinkoffApi.Services
                 {
                     //BBG0013HGFT4 USD000UTSTOM
                     USDRUB = await GetByCandles("BBG0013HGFT4")
-                    ?? await GetClosePriceByCandles("BBG0013HGFT4");
+                        ?? await GetClosePriceByCandles("BBG0013HGFT4");
                 }
                 finally
                 {
@@ -319,7 +324,23 @@ namespace InvestCore.TinkoffApi.Services
             }
         }
 
-        private async Task<decimal?> GetCurrentOrLastPrice(SymbolModel model)
+        private string GetCacheKey(SymbolModel model)
+            => model.Figi;
+
+        private Task<decimal?> GetCurrentOrLastPrice(SymbolModel model)
+        {
+            string key = GetCacheKey(model);
+
+            Func<ICacheEntry, Task<decimal?>> factory = async entry =>
+            {
+                entry.SetAbsoluteExpiration(cacheTime);
+                return await GetCurrentOrLastPriceInternal(model);
+            };
+
+            return _memoryCache.GetOrCreateAsync(key, factory);
+        }
+
+        private async Task<decimal?> GetCurrentOrLastPriceInternal(SymbolModel model)
         {
             try
             {

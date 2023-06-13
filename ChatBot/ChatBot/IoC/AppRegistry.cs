@@ -6,6 +6,7 @@ using ChatBot.Data.Helpers;
 using ChatBot.Data.Repositories;
 using ChatBot.Shares.Integration.Services;
 using InvestCore.TinkoffApi.Services;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Tinkoff.InvestApi;
@@ -32,7 +33,7 @@ namespace ChatBot.IoC
             var logFilePath = Path.Combine(FileHelper.DirectoryPath, "log.txt");
             var builder = new ContainerBuilder();
 
-            #region Logger
+            #region Infrastructure
 
             builder.Register(c =>
                 LoggerFactory.Create(x =>
@@ -42,8 +43,9 @@ namespace ChatBot.IoC
                     x.AddFile(logFilePath, true);
                 }).CreateLogger<ILogger>())
                 .SingleInstance().As<ILogger>();
+            builder.Register(c => new MemoryCache(new MemoryCacheOptions())).SingleInstance().As<IMemoryCache>();
 
-            #endregion Logger
+            #endregion Infrastructure
 
             #region Repository
 

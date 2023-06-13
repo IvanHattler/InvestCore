@@ -33,11 +33,12 @@ namespace InvestHelper.IoC
                     x.AddConsole();
                     x.AddDebug();
                     x.SetMinimumLevel(EnvironmentHelper.IsDebug ? LogLevel.Trace : LogLevel.Warning);
-                }).CreateLogger<ILogger>());
-            builder.Services.AddSingleton<IShareService, TinkoffApiService>();
-            builder.Services.AddSingleton(c => InvestApiClientFactory.Create(tinkoffToken));
-            builder.Services.AddControllersWithViews();
-            builder.Services.AddSwaggerGen();
+                }).CreateLogger<ILogger>())
+                .AddSingleton<IShareService, TinkoffApiService>()
+                .AddSingleton(c => InvestApiClientFactory.Create(tinkoffToken))
+                .AddSwaggerGen()
+                .AddMemoryCache()
+                .AddControllersWithViews();
 
             var app = builder.Build();
             app.UseForwardedHeaders(new ForwardedHeadersOptions

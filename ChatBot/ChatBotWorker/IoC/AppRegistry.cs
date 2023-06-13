@@ -6,6 +6,7 @@ using ChatBot.Data.Helpers;
 using ChatBot.Data.Repositories;
 using ChatBot.Shares.Integration.Services;
 using InvestCore.TinkoffApi.Services;
+using Microsoft.Extensions.Caching.Memory;
 using Tinkoff.InvestApi;
 using IShareService = ChatBot.Core.Services.Interfaces.IShareService;
 
@@ -35,7 +36,7 @@ namespace ChatBotWorker.IoC
             var needSendMessagesOnStart = configuration.GetRequiredSection("NeedSendMessagesOnStart").Get<bool>();
             var tinkoffToken = configuration.GetRequiredSection("TinkoffToken").Get<string>();
 
-            #region Logger
+            #region Infrastructure
 
             builder.Register(c =>
                 LoggerFactory.Create(x =>
@@ -43,8 +44,9 @@ namespace ChatBotWorker.IoC
                     x.AddFile(logFilePath, true);
                 }).CreateLogger<ILogger>())
                 .SingleInstance().As<ILogger>();
+            builder.Register(c => new MemoryCache(new MemoryCacheOptions())).SingleInstance().As<IMemoryCache>();
 
-            #endregion Logger
+            #endregion Infrastructure
 
             #region Repository
 
