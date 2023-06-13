@@ -32,31 +32,42 @@ export class HomeComponent {
   InstrumentType: typeof InstrumentType = InstrumentType;
 
   public tickerInfos: TickerPriceInfo[] = [
-    new TickerPriceInfo(InstrumentType.Share, "SBER", "TQBR", 50),
-    new TickerPriceInfo(InstrumentType.Share, "SNGSP", "TQBR", 700),
-    new TickerPriceInfo(InstrumentType.Share, "MTSS", "TQBR", 100),
-    new TickerPriceInfo(InstrumentType.Share, "MGNT", "TQBR", 2),
-    new TickerPriceInfo(InstrumentType.Share, "OGKB", "TQBR", 40000),
-    new TickerPriceInfo(InstrumentType.Share, "LKOH", "TQBR", 4),
-    new TickerPriceInfo(InstrumentType.Share, "RASP", "TQBR", 70),
-    new TickerPriceInfo(InstrumentType.Share, "MAGN", "TQBR", 400),
-    new TickerPriceInfo(InstrumentType.Share, "WUSH", "TQBR", 5),
-    new TickerPriceInfo(InstrumentType.Share, "PHOR", "TQBR", 2),
-    new TickerPriceInfo(InstrumentType.Share, "MSFT", "SPBXM", 1),
-    new TickerPriceInfo(InstrumentType.Share, "OZON", "TQBR", 2),
-    new TickerPriceInfo(InstrumentType.Share, "INTC", "SPBXM", 5),
-    new TickerPriceInfo(InstrumentType.Bond, "RU000A103WV8", "TQCB", 30),
-    //new TickerPriceInfo(InstrumentType.Etf, "SBSP", "TQTF", 17),
-    new TickerPriceInfo(InstrumentType.Etf, "SBMX", "TQTF", 6800),
-    //new TickerPriceInfo(InstrumentType.Etf, "BOND", "TQTF", 3),
-    //new TickerPriceInfo(InstrumentType.Etf, "SBGD", "TQTF", 1466),
-    new TickerPriceInfo(InstrumentType.Etf, "SBGB", "TQTF", 4406),
+    //new TickerPriceInfo(InstrumentType.Share, "SBER", "TQBR", 50),
+    //new TickerPriceInfo(InstrumentType.Share, "SNGSP", "TQBR", 700),
+    //new TickerPriceInfo(InstrumentType.Share, "MTSS", "TQBR", 100),
+    //new TickerPriceInfo(InstrumentType.Share, "MGNT", "TQBR", 2),
+    //new TickerPriceInfo(InstrumentType.Share, "OGKB", "TQBR", 40000),
+    //new TickerPriceInfo(InstrumentType.Share, "LKOH", "TQBR", 4),
+    //new TickerPriceInfo(InstrumentType.Share, "RASP", "TQBR", 70),
+    //new TickerPriceInfo(InstrumentType.Share, "MAGN", "TQBR", 400),
+    //new TickerPriceInfo(InstrumentType.Share, "WUSH", "TQBR", 5),
+    //new TickerPriceInfo(InstrumentType.Share, "PHOR", "TQBR", 2),
+    //new TickerPriceInfo(InstrumentType.Share, "MSFT", "SPBXM", 1),
+    //new TickerPriceInfo(InstrumentType.Share, "OZON", "TQBR", 2),
+    //new TickerPriceInfo(InstrumentType.Share, "INTC", "SPBXM", 5),
+    //new TickerPriceInfo(InstrumentType.Bond, "RU000A103WV8", "TQCB", 30),
+    ////new TickerPriceInfo(InstrumentType.Etf, "SBSP", "TQTF", 17),
+    //new TickerPriceInfo(InstrumentType.Etf, "SBMX", "TQTF", 6800),
+    ////new TickerPriceInfo(InstrumentType.Etf, "BOND", "TQTF", 3),
+    ////new TickerPriceInfo(InstrumentType.Etf, "SBGD", "TQTF", 1466),
+    //new TickerPriceInfo(InstrumentType.Etf, "SBGB", "TQTF", 4406),
   ];
 
   public overall: number | undefined;
 
   constructor(private instrumentPricesService: InstrumentPricesService,
-              public dialog: MatDialog) {
+    public dialog: MatDialog) {
+
+    instrumentPricesService.getAll().subscribe(
+      data => {
+        this.tickerInfos = data;
+        this.updateInstrumentChart();
+        this.updatePercentsChart();
+        this.updateOverall();
+      },
+      error => alert(error)
+    );
+
     this.instrumentsChartOptions = {
       chart: {
         width: 500,
@@ -114,9 +125,9 @@ export class HomeComponent {
         let tickerPrices = objToMap(data);
         let t = this;
         tickerPrices.forEach(function (value, key) {
-          let tickerInfo = t.tickerInfos.find(x => x.Ticker == key);
+          let tickerInfo = t.tickerInfos.find(x => x.ticker == key);
           if (tickerInfo != null) {
-            tickerInfo.Price = value;
+            tickerInfo.price = value;
           }
         });
 
@@ -130,7 +141,7 @@ export class HomeComponent {
   }
 
   private updatePercentsChart() {
-      let percentsOfInstumentsGroups = Object.entries(groupBy(this.tickerInfos, i => InstrumentType[i.TickerType]));
+      let percentsOfInstumentsGroups = Object.entries(groupBy(this.tickerInfos, i => InstrumentType[i.tickerType]));
 
       this.percentsChartOptions.labels = percentsOfInstumentsGroups
           .map(x => x[0]);
@@ -139,8 +150,8 @@ export class HomeComponent {
   }
 
   private updateInstrumentChart() {
-      this.instrumentsChartOptions.labels = [...this.tickerInfos.map(x => x.Ticker)];
-      this.instrumentsChartOptions.series = [...this.tickerInfos.map(x => x.Value)];
+      this.instrumentsChartOptions.labels = [...this.tickerInfos.map(x => x.ticker)];
+      this.instrumentsChartOptions.series = [...this.tickerInfos.map(x => x.value)];
   }
 
   private updateOverall() {

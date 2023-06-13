@@ -6,7 +6,6 @@ namespace InvestCore.Domain.Models
     {
         public decimal Price { get; set; }
 
-        [JsonIgnore]
         public decimal Value => Count * Price;
     }
 }

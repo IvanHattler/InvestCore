@@ -2,34 +2,33 @@ import { Inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-const API_URL = 'InstrumentPrices/GetPrices';
 
 export class TickerInfoBase {
-  public TickerType: InstrumentType;
-  public Ticker: string;
-  public ClassCode: string;
+  public tickerType: InstrumentType;
+  public ticker: string;
+  public classCode: string;
 
   constructor(tickerType: InstrumentType, ticker: string, classCode: string) {
-    this.TickerType = tickerType;
-    this.Ticker = ticker;
-    this.ClassCode = classCode;
+    this.tickerType = tickerType;
+    this.ticker = ticker;
+    this.classCode = classCode;
   }
 }
 
 export class TickerPriceInfo extends TickerInfoBase {
-  public Count: number | undefined;
-  public Price: number | undefined;
+  public count: number | undefined;
+  public price: number | undefined;
 
-  public get Value(): number | undefined {
-    if (this.Count == null || this.Price == null) {
+  public get value(): number | undefined {
+    if (this.count == null || this.price == null) {
       return undefined;
     }
-    return this.Count * this.Price;
+    return this.count * this.price;
   }
 
   constructor(tickerType: InstrumentType, ticker: string, classCode: string, count: number) {
     super(tickerType, ticker, classCode);
-    this.Count = count;
+    this.count = count;
   }
 }
 
@@ -46,7 +45,13 @@ export class InstrumentPricesService {
 
   constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) { }
 
+  public getAll(): Observable<TickerPriceInfo[]> {
+    const API_URL = 'InstrumentPrices/GetAll';
+    return this.http.get<TickerPriceInfo[]>(this.baseUrl + API_URL);
+  }
+
   public getPrices(tickerInfos: TickerInfoBase[]): Observable<Map<string, number>> {
+    const API_URL = 'InstrumentPrices/GetPrices';
     const httpOptions = {
       headers: new HttpHeaders({ 'Content-Type': 'application/json' })
     };

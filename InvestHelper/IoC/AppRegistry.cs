@@ -1,8 +1,10 @@
 ﻿using System.Reflection;
 using InvestCore.Domain.Helpers;
+using InvestCore.Domain.Models;
 using InvestCore.Domain.Services.Interfaces;
 using InvestCore.TinkoffApi.Services;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Tinkoff.InvestApi;
 
 namespace InvestHelper.IoC
@@ -38,6 +40,8 @@ namespace InvestHelper.IoC
                 .AddSingleton(c => InvestApiClientFactory.Create(tinkoffToken))
                 .AddSwaggerGen()
                 .AddMemoryCache()
+                .AddSingleton<IEnumerable<TickerPriceInfo>>(x =>
+                    configuration.GetRequiredSection("TickerInfos").Get<TickerPriceInfo[]>() ?? Array.Empty<TickerPriceInfo>())
                 .AddControllersWithViews();
 
             var app = builder.Build();

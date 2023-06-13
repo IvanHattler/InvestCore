@@ -10,10 +10,31 @@ namespace InvestHelper.Controllers
     public class InstrumentPricesController : ControllerBase
     {
         private readonly IShareService _shareService;
+        private readonly IEnumerable<TickerPriceInfo> _tickerInfosFromConfig;
 
-        public InstrumentPricesController(IShareService shareService)
+        public InstrumentPricesController(IShareService shareService, IEnumerable<TickerPriceInfo> tickerInfosFromConfig)
         {
             _shareService = shareService ?? throw new ArgumentNullException(nameof(shareService));
+            _tickerInfosFromConfig = tickerInfosFromConfig ?? throw new ArgumentNullException(nameof(tickerInfosFromConfig));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var prices = await _shareService.GetCurrentOrLastPricesAsync(_tickerInfosFromConfig);
+D
+            foreach (var (ticker, price) in prices)
+            {
+                var info = _tickerInfosFromConfig
+                    .FirstOrDefault(x => x.Ticker == ticker);
+
+                if (info != null)
+                {
+                    info.Price = price;
+                }
+            }
+
+            return Ok(_tickerInfosFromConfig);
         }
 
         [HttpPost]

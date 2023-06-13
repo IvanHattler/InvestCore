@@ -12,6 +12,6 @@ export function objToMap(o: any): Map <string, number> {
 
 export function sumValues(tickerInfos: TickerPriceInfo[]) {
   return tickerInfos
-    .map(x => x.Value)
+    .map(x => x.value)
     .reduce((sum, current) => (sum ?? 0) + (current ?? 0));
 }
