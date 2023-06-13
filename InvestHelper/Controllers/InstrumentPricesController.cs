@@ -22,7 +22,7 @@ namespace InvestHelper.Controllers
         public async Task<IActionResult> GetAll()
         {
             var prices = await _shareService.GetCurrentOrLastPricesAsync(_tickerInfosFromConfig);
-D
+
             foreach (var (ticker, price) in prices)
             {
                 var info = _tickerInfosFromConfig
@@ -34,7 +34,7 @@ D
                 }
             }
 
-            return Ok(_tickerInfosFromConfig);
+            return Ok(_tickerInfosFromConfig.OrderByDescending(x => x.Value));
         }
 
         [HttpPost]

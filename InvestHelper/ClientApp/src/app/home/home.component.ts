@@ -31,27 +31,7 @@ export class HomeComponent {
 
   InstrumentType: typeof InstrumentType = InstrumentType;
 
-  public tickerInfos: TickerPriceInfo[] = [
-    //new TickerPriceInfo(InstrumentType.Share, "SBER", "TQBR", 50),
-    //new TickerPriceInfo(InstrumentType.Share, "SNGSP", "TQBR", 700),
-    //new TickerPriceInfo(InstrumentType.Share, "MTSS", "TQBR", 100),
-    //new TickerPriceInfo(InstrumentType.Share, "MGNT", "TQBR", 2),
-    //new TickerPriceInfo(InstrumentType.Share, "OGKB", "TQBR", 40000),
-    //new TickerPriceInfo(InstrumentType.Share, "LKOH", "TQBR", 4),
-    //new TickerPriceInfo(InstrumentType.Share, "RASP", "TQBR", 70),
-    //new TickerPriceInfo(InstrumentType.Share, "MAGN", "TQBR", 400),
-    //new TickerPriceInfo(InstrumentType.Share, "WUSH", "TQBR", 5),
-    //new TickerPriceInfo(InstrumentType.Share, "PHOR", "TQBR", 2),
-    //new TickerPriceInfo(InstrumentType.Share, "MSFT", "SPBXM", 1),
-    //new TickerPriceInfo(InstrumentType.Share, "OZON", "TQBR", 2),
-    //new TickerPriceInfo(InstrumentType.Share, "INTC", "SPBXM", 5),
-    //new TickerPriceInfo(InstrumentType.Bond, "RU000A103WV8", "TQCB", 30),
-    ////new TickerPriceInfo(InstrumentType.Etf, "SBSP", "TQTF", 17),
-    //new TickerPriceInfo(InstrumentType.Etf, "SBMX", "TQTF", 6800),
-    ////new TickerPriceInfo(InstrumentType.Etf, "BOND", "TQTF", 3),
-    ////new TickerPriceInfo(InstrumentType.Etf, "SBGD", "TQTF", 1466),
-    //new TickerPriceInfo(InstrumentType.Etf, "SBGB", "TQTF", 4406),
-  ];
+  public tickerInfos: TickerPriceInfo[] = [];
 
   public overall: number | undefined;
 
@@ -158,30 +138,27 @@ export class HomeComponent {
     this.overall = sumValues(this.tickerInfos);
   }
 
-  //public loadPrice(tickerInfo: TickerPriceInfo) {
-  //  this.instrumentPricesService.getPrices([tickerInfo]).subscribe(
-  //    data => {
-  //      let tickerPrices = objToMap(data);
-  //      let t = this;
-  //      tickerPrices.forEach(function (value, key) {
-  //        let tickerInfo = t.tickerInfos.find(x => x.Ticker == key);
-  //        if (tickerInfo != null) {
-  //          tickerInfo.Price = value;
-  //        }
-  //      });
-  //    },
-  //    err => {
-  //      alert(err.message);
-  //    });
-  //}
-}
+  public loadPrice(tickerInfo: TickerPriceInfo) {
+    this.instrumentPricesService.getPrices([tickerInfo]).subscribe(
+      data => {
+        let tickerPrices = objToMap(data);
+        let t = this;
+        tickerPrices.forEach(function (value, key) {
+          let tickerInfo = t.tickerInfos.find(x => x.ticker == key);
+          if (tickerInfo != null) {
+            tickerInfo.price = value;
+          }
+        });
+      },
+      err => {
+        alert(err.message);
+      });
+  }
 
-@Pipe({
-  name: 'enumToArray'
-})
-export class EnumToArrayPipe implements PipeTransform {
-  transform(data: Object) {
-    const keys = Object.keys(data);
-    return keys.slice(keys.length / 2);
+  public delete(tickerInfo: TickerPriceInfo) {
+    const index = this.tickerInfos.indexOf(tickerInfo, 0);
+    if (index > -1) {
+      this.tickerInfos.splice(index, 1);
+    }
   }
 }
