@@ -4,10 +4,33 @@ import { Observable } from 'rxjs';
 
 const API_URL = 'InstrumentPrices/GetPrices';
 
-export interface ITickerInfoBase {
-  TickerType: InstrumentType;
-  Ticker: string;
-  ClassCode: string;
+export class TickerInfoBase {
+  public TickerType: InstrumentType;
+  public Ticker: string;
+  public ClassCode: string;
+
+  constructor(tickerType: InstrumentType, ticker: string, classCode: string) {
+    this.TickerType = tickerType;
+    this.Ticker = ticker;
+    this.ClassCode = classCode;
+  }
+}
+
+export class TickerPriceInfo extends TickerInfoBase {
+  public Count: number | undefined;
+  public Price: number | undefined;
+
+  public get Value(): number | undefined {
+    if (this.Count == null || this.Price == null) {
+      return undefined;
+    }
+    return this.Count * this.Price;
+  }
+
+  constructor(tickerType: InstrumentType, ticker: string, classCode: string, count: number) {
+    super(tickerType, ticker, classCode);
+    this.Count = count;
+  }
 }
 
 export enum InstrumentType {
@@ -23,7 +46,7 @@ export class InstrumentPricesService {
 
   constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) { }
 
-  public getPrices(tickerInfos: ITickerInfoBase[]): Observable<Map<string, number>> {
+  public getPrices(tickerInfos: TickerInfoBase[]): Observable<Map<string, number>> {
     const httpOptions = {
       headers: new HttpHeaders({ 'Content-Type': 'application/json' })
     };

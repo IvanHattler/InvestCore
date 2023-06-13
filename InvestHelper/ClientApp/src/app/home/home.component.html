@@ -1,25 +1,77 @@
-<h1>Ticker prices</h1>
+<div class="container">
+  <div class="row">
+    <div style="font-size: 30px">
+      Overall: <span style="color: mediumseagreen">{{ overall?.toFixed(2) }}</span>
+    </div>
+    <div class="col">
+      <table border="2" class='table table-striped' aria-labelledby="tableLabel" *ngIf="tickerInfos">
+        <thead class="thead-dark">
+          <tr>
+            <th>Ticker</th>
+            <th>TickerType</th>
+            <th>ClassCode</th>
+            <th>Count</th>
+            <th>Price</th>
+            <th>Value</th>
+            <!--<th></th>-->
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let tickerInfo of tickerInfos">
+            <td>{{ tickerInfo.Ticker }}</td>
+            <td>{{ InstrumentType[tickerInfo.TickerType] }}</td>
+            <td>{{ tickerInfo.ClassCode }}</td>
+            <td>{{ tickerInfo.Count }}</td>
+            <td>{{ tickerInfo.Price?.toFixed(2) }}</td>
+            <td>{{ tickerInfo.Value?.toFixed(2) }}</td>
+            <!--<td><button class="btn btn-success btn-sm" (click)="loadPrice(tickerInfo)">Load price</button></td>-->
+          </tr>
+        </tbody>
+      </table>
+      <button class="btn btn-default btn-sm mg5" (click)="showDialog()">New</button>
+      <button class="btn btn-success btn-sm mg5" (click)="loadPrices()" style="margin: 5px">Load prices</button>
+    </div>
 
-<table border="2" class='table table-striped' aria-labelledby="tableLabel" *ngIf="tickerInfos">
-  <thead class="thead-dark">
-    <tr>
-      <th>Ticker</th>
-      <th>TickerType</th>
-      <th>ClassCode</th>
-      <th>Price</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let tickerInfo of tickerInfos">
-      <td>{{ tickerInfo.Ticker }}</td>
-      <td>{{ InstrumentType[tickerInfo.TickerType] }}</td>
-      <td>{{ tickerInfo.ClassCode }}</td>
-      <td>{{ tickerPrices.get(tickerInfo.Ticker) }}</td>
-      <td><button class="btn btn-success btn-sm" (click)="loadPrice(tickerInfo)">Load price</button></td>
-    </tr>
-  </tbody>
-</table>
-<!--<button class="btn btn-success btn-sm">New</button>-->
+    <div class="col">
+      <div id="instrumentsChart">
+        <apx-chart [series]="instrumentsChartOptions.series"
+                   [chart]="instrumentsChartOptions.chart"
+                   [labels]="instrumentsChartOptions.labels"
+                   [responsive]="instrumentsChartOptions.responsive"></apx-chart>
+      </div>
 
-<button class="btn btn-success btn-sm" (click)="loadPrices()">Load prices</button>
+      <div id="percentsChart">
+        <apx-chart [series]="percentsChartOptions.series"
+                   [chart]="percentsChartOptions.chart"
+                   [labels]="percentsChartOptions.labels"
+                   [responsive]="percentsChartOptions.responsive"></apx-chart>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #dialogRef let-data>
+  <h5>Add new ticker info</h5>
+  <div>
+    <label for="height">Ticker: </label>
+    <input type="text" id="ticker" name="ticker" placeholder="Ticker" [(ngModel)]="data.Ticker" class="form-control" />
+  </div>
+  <div>
+    <div class="form-group">
+      <label for="tickerType">Ticker type: </label>
+      <select class="form-control" id="tickerType" name="tickerType" [(ngModel)]="data.TickerType">
+        <option *ngFor="let type of InstrumentType | keyvalue" value="{{ type.key }}"> {{ type.value }} </option>
+      </select>
+    </div>
+  </div>
+  <div>
+    <label for="height">Class code: </label>
+    <input type="text" id="classCode" name="classCode" placeholder="ClassCode" [(ngModel)]="data.ClassCode" class="form-control" />
+  </div>
+  <div>
+    <label for="height">Count: </label>
+    <input type="number" id="count" name="count" placeholder="Count" [(ngModel)]="data.Count" class="form-control" />
+  </div>
+  <button class="btn btn-success btn-sm mg5" mat-button mat-dialog-close="save">Save</button>
+  <button class="btn btn-danger btn-sm mg5" mat-button mat-dialog-close="close">Close</button>
+</ng-template>
