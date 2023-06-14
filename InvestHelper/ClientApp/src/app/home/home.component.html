@@ -58,8 +58,8 @@
 </div>
 
 <ng-template #dialogRef let-data>
-  <div>
-    <h5>Add new ticker info</h5>
+  <h5 mat-dialog-title>Add new ticker info</h5>
+  <mat-dialog-content>
     <div>
       <label for="height">Ticker: </label>
       <input type="text" id="ticker" name="ticker" placeholder="Ticker" [(ngModel)]="data.ticker" class="form-control" />
@@ -80,7 +80,9 @@
       <label for="height">Count: </label>
       <input type="number" id="count" name="count" placeholder="Count" [(ngModel)]="data.count" class="form-control" />
     </div>
+  </mat-dialog-content>
+  <mat-dialog-actions>
     <button class="btn btn-success btn-sm mg5" mat-button mat-dialog-close="save">Save</button>
     <button class="btn btn-danger btn-sm mg5" mat-button mat-dialog-close="close">Close</button>
-  </div>
+  </mat-dialog-actions>
 </ng-template>

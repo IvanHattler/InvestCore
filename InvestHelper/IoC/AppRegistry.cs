@@ -4,7 +4,6 @@ using InvestCore.Domain.Models;
 using InvestCore.Domain.Services.Interfaces;
 using InvestCore.TinkoffApi.Services;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Tinkoff.InvestApi;
 
 namespace InvestHelper.IoC
