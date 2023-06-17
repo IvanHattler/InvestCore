@@ -1,9 +1,12 @@
 ﻿using System.Reflection;
+using InvestCore.DataLayer;
 using InvestCore.Domain.Helpers;
 using InvestCore.Domain.Models;
 using InvestCore.Domain.Services.Interfaces;
 using InvestCore.TinkoffApi.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 using Tinkoff.InvestApi;
 
 namespace InvestHelper.IoC
@@ -18,6 +21,7 @@ namespace InvestHelper.IoC
                 .AddUserSecrets(Assembly.GetExecutingAssembly())
                 .AddJsonFile("configs/ticker-infos.json", false)
                 .AddJsonFile("configs/tinkoff-token.json", false)
+                .AddJsonFile("configs/connection-strings.json", false)
                 .Build();
         }
 
@@ -26,6 +30,8 @@ namespace InvestHelper.IoC
             var configuration = BuildConfig(args);
             var tinkoffToken = configuration.GetRequiredSection("TinkoffToken").Get<string>()
                 ?? string.Empty;
+            var tickerInfos = configuration.GetRequiredSection("TickerInfos").Get<TickerPriceInfo[]>() ?? Array.Empty<TickerPriceInfo>();
+            var connectionString = configuration.GetConnectionString("Default");
 
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddSingleton<ILogger>(c =>
@@ -39,8 +45,8 @@ namespace InvestHelper.IoC
                 .AddSingleton(c => InvestApiClientFactory.Create(tinkoffToken))
                 .AddSwaggerGen()
                 .AddMemoryCache()
-                .AddSingleton<IEnumerable<TickerPriceInfo>>(x =>
-                    configuration.GetRequiredSection("TickerInfos").Get<TickerPriceInfo[]>() ?? Array.Empty<TickerPriceInfo>())
+                .AddSingleton<IEnumerable<TickerPriceInfo>>(x => tickerInfos)
+                .AddDbContextFactory<BaseDbContext>(x => x.UseNpgsql(connectionString))
                 .AddControllersWithViews();
 
             var app = builder.Build();
