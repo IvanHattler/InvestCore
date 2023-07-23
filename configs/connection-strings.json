@@ -1,5 +1,5 @@
 {
   "ConnectionStrings": {
-    "Default": "Server=localhost;Port=5433;Database=investhelper;User ID=postgres;Password=12345"
+    "Default": ""
   }
 }

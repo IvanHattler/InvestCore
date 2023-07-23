@@ -1,7 +1,7 @@
 {
   "Replenishment": {
-    "ReplenishmentAmount": 25000,
-    "CurrentSum": 19.44,
+    "ReplenishmentAmount": 0,
+    "CurrentSum": 0,
     "SavePercent": 0.01
   }
 }
