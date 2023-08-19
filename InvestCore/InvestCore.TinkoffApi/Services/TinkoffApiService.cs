@@ -8,7 +8,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Tinkoff.InvestApi;
 using Tinkoff.InvestApi.V1;
-using static Grpc.Core.Metadata;
 using InstrumentType = InvestCore.Domain.Models.InstrumentType;
 
 namespace InvestCore.TinkoffApi.Services
@@ -39,8 +38,7 @@ namespace InvestCore.TinkoffApi.Services
                 try
                 {
                     //BBG0013HGFT4 USD000UTSTOM
-                    USDRUB = await GetByCandles("BBG0013HGFT4")
-                        ?? await GetClosePriceByCandles("BBG0013HGFT4");
+                    USDRUB = await GetClosePrice("BBG0013HGFT4");
                 }
                 finally
                 {
@@ -98,6 +96,7 @@ namespace InvestCore.TinkoffApi.Services
             return Etfs;
         }
 
+        [Obsolete($"Использовать GetCurrentOrLastPricesAsync")]
         public async Task<Dictionary<string, decimal>> GetPricesAsync(IEnumerable<TickerInfoBase> tickerInfos)
         {
             var result = new Dictionary<string, decimal>(tickerInfos.Count());
@@ -264,6 +263,7 @@ namespace InvestCore.TinkoffApi.Services
             }
         }
 
+        [Obsolete]
         private async Task<decimal?> GetCurrentPrice(string symbol, InstrumentType type, string classCode)
         {
             try
@@ -324,23 +324,23 @@ namespace InvestCore.TinkoffApi.Services
             }
         }
 
-        private string GetCacheKey(SymbolModel model)
+        private static string GetCacheKey(SymbolModel model)
             => model.Figi;
 
         private Task<decimal?> GetCurrentOrLastPrice(SymbolModel model)
         {
             string key = GetCacheKey(model);
 
-            Func<ICacheEntry, Task<decimal?>> factory = async entry =>
+            return _memoryCache.GetOrCreateAsync(key, GetCurrentOrLastPrice);
+
+            async Task<decimal?> GetCurrentOrLastPrice(ICacheEntry entry)
             {
                 entry.SetAbsoluteExpiration(cacheTime);
-                return await GetCurrentOrLastPriceInternal(model);
-            };
-
-            return _memoryCache.GetOrCreateAsync(key, factory);
+                return await GetLastPriceInternal(model);
+            }
         }
 
-        private async Task<decimal?> GetCurrentOrLastPriceInternal(SymbolModel model)
+        private async Task<decimal?> GetLastPriceInternal(SymbolModel model)
         {
             try
             {
@@ -349,18 +349,14 @@ namespace InvestCore.TinkoffApi.Services
                     case InstrumentType.Share:
                     case InstrumentType.Etf:
                         {
-                            return await GetByCandles(model.Figi)
-                                ?? await GetClosePriceByCandles(model.Figi)
-                                ?? await GetClosePrice(model.Figi);
+                            return await GetClosePrice(model.Figi);
                         }
                     case InstrumentType.Bond:
                         {
                             if (model.Nominal == null)
                                 return null;
 
-                            var price = await GetByCandles(model.Figi)
-                                ?? await GetClosePriceByCandles(model.Figi)
-                                ?? await GetClosePrice(model.Figi);
+                            var price = await GetClosePrice(model.Figi);
 
                             if (price == null)
                                 return null;
@@ -399,6 +395,7 @@ namespace InvestCore.TinkoffApi.Services
             return price / 100 * nominal + accruedInterest;
         }
 
+        [Obsolete]
         private async Task<decimal?> GetByCandles(string figi)
         {
             var response = await _investApiClient.MarketData.GetCandlesAsync(new GetCandlesRequest()
@@ -420,30 +417,10 @@ namespace InvestCore.TinkoffApi.Services
             return null;
         }
 
+        [Obsolete]
         private static decimal CalculatePriceByCandle(HistoricCandle candle)
         {
             return candle.Open;
-        }
-
-        private async Task<decimal?> GetClosePriceByCandles(string figi)
-        {
-            var response = await _investApiClient.MarketData.GetCandlesAsync(new GetCandlesRequest()
-            {
-                From = DateTime.UtcNow.AddDays(-3).ToTimestamp(),
-                To = DateTime.UtcNow.ToUniversalTime().ToTimestamp(),
-                InstrumentId = figi,
-                Interval = CandleInterval.Day,
-            });
-
-            var lastCandle = response
-                .Candles
-                .OrderBy(x => x.Time)
-                .LastOrDefault();
-
-            if (lastCandle != null)
-                return lastCandle.Close;
-
-            return null;
         }
 
         private async Task<decimal?> GetClosePrice(string figi)
