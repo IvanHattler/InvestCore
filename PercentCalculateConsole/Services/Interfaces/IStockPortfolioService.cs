@@ -7,7 +7,7 @@ namespace PercentCalculateConsole.Services.Interfaces
     {
         void UpdateOverallSum(StockPortfolioCalculationModel stockPortfolio, BuyModel model);
 
-        Dictionary<string, decimal> GetStockProfilePrices(StockPortfolioCalculationModel stockPortfolio);
+        Task<Dictionary<string, decimal>> GetStockProfilePrices(StockPortfolioCalculationModel stockPortfolio);
 
         void LoadPricesToModel(StockPortfolioCalculationModel model, IDictionary<string, decimal> prices);
     }

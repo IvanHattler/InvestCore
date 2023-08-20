@@ -27,10 +27,13 @@ namespace PercentCalculateConsole.Services.Implementation
             stockPortfolio.Replenishment.CurrentSum = model.SumDifference;
         }
 
-        public Dictionary<string, decimal> GetStockProfilePrices(StockPortfolioCalculationModel stockPortfolio)
-            => _shareService
-                .GetCurrentOrLastPricesAsync(stockPortfolio.GetAllTickerInfos())
-                .Result;
+        public async Task<Dictionary<string, decimal>> GetStockProfilePrices(StockPortfolioCalculationModel stockPortfolio)
+        {
+            var prices = await _shareService
+                .GetCurrentOrLastPricesAsync(stockPortfolio.GetAllTickerInfos());
+
+            return prices;
+        }
 
         public void LoadPricesToModel(StockPortfolioCalculationModel model, IDictionary<string, decimal> prices)
         {

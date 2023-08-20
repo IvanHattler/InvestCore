@@ -4,8 +4,8 @@ namespace PercentCalculateConsole.Services.Interfaces
 {
     public interface IMessageService
     {
-        string GetResultMessage(StockPortfolioCalculationModel stockPortfolio);
+        Task<string> GetResultMessage(StockPortfolioCalculationModel stockPortfolio);
 
-        string GetTestResultMessage(StockPortfolioCalculationModel stockPortfolio);
+        Task<string> GetTestResultMessage(StockPortfolioCalculationModel stockPortfolio);
     }
 }

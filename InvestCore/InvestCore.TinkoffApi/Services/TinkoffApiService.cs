@@ -29,6 +29,17 @@ namespace InvestCore.TinkoffApi.Services
             _investApiClient = investApiClient;
             _logger = logger;
             _memoryCache = memoryCache;
+
+            Preload();
+        }
+
+        public void Preload()
+        {
+            Task.WaitAll(
+                GetUSDRUBAsync(),
+                GetSharesAsync(),
+                GetBondsAsync(),
+                GetEtfsAsync());
         }
 
         public async Task<decimal?> GetUSDRUBAsync()
@@ -38,7 +49,7 @@ namespace InvestCore.TinkoffApi.Services
                 try
                 {
                     //BBG0013HGFT4 USD000UTSTOM
-                    USDRUB = await GetClosePrice("BBG0013HGFT4");
+                    USDRUB = await GetClosePrice("BBG0013HGFT4").ConfigureAwait(false);
                 }
                 finally
                 {
@@ -54,7 +65,7 @@ namespace InvestCore.TinkoffApi.Services
             {
                 try
                 {
-                    Shares = (await _investApiClient.Instruments.SharesAsync()).Instruments;
+                    Shares = (await _investApiClient.Instruments.SharesAsync().ConfigureAwait(false)).Instruments;
                 }
                 finally
                 {
@@ -70,7 +81,7 @@ namespace InvestCore.TinkoffApi.Services
             {
                 try
                 {
-                    Bonds = (await _investApiClient.Instruments.BondsAsync()).Instruments;
+                    Bonds = (await _investApiClient.Instruments.BondsAsync().ConfigureAwait(false)).Instruments;
                 }
                 finally
                 {
@@ -86,7 +97,7 @@ namespace InvestCore.TinkoffApi.Services
             {
                 try
                 {
-                    Etfs = (await _investApiClient.Instruments.EtfsAsync()).Instruments;
+                    Etfs = (await _investApiClient.Instruments.EtfsAsync().ConfigureAwait(false)).Instruments;
                 }
                 finally
                 {
@@ -127,45 +138,116 @@ namespace InvestCore.TinkoffApi.Services
             return result;
         }
 
+        //public async Task<Dictionary<string, decimal>> GetCurrentOrLastPricesAsync(IEnumerable<TickerInfoBase> tickerInfos)
+        //{
+        //    var result = new Dictionary<string, decimal>(tickerInfos.Count());
+        //    var symbolModels = await GetSymbolModels(tickerInfos);
+
+        //    foreach (var symbolModel in symbolModels.Where(x => x != null))
+        //    {
+        //        try
+        //        {
+        //            var currentPrice = await GetLastPrice(symbolModel);
+
+        //            if (currentPrice.HasValue)
+        //            {
+        //                if (symbolModel.Currency == Usd)
+        //                    currentPrice *= await GetUSDRUBAsync();
+
+        //                result.TryAdd(symbolModel.Symbol, currentPrice.Value);
+        //            }
+        //        }
+        //        catch (InstrumentNotFoundException e)
+        //        {
+        //            _logger.LogWarning("Ticker {ticker} not found", e.Message);
+        //        }
+        //        catch (RpcException e)
+        //        {
+        //            if (e.StatusCode == StatusCode.Unauthenticated)
+        //            {
+        //                _logger.LogError("Tinkoff token is irrelevant");
+        //            }
+        //            if (e.StatusCode == StatusCode.NotFound)
+        //            {
+        //                _logger.LogWarning("Ticker {ticker} not found", symbolModel.Symbol);
+        //            }
+        //        }
+        //    }
+
+        //    FillDefaultValues(tickerInfos, result);
+
+        //    return result;
+        //}
+
         public async Task<Dictionary<string, decimal>> GetCurrentOrLastPricesAsync(IEnumerable<TickerInfoBase> tickerInfos)
         {
-            var result = new Dictionary<string, decimal>(tickerInfos.Count());
-            var symbolModels = await GetSymbolModels(tickerInfos);
+            var tasks = tickerInfos
+                .Select(t => AwaitAndGetPriceAsync(
+                    GetDataForPrice(t)))
+                .ToArray();
 
-            foreach (var symbolModel in symbolModels)
-            {
-                try
-                {
-                    var currentPrice = await GetCurrentOrLastPrice(symbolModel);
+            var res = await Task.WhenAll(tasks);
 
-                    if (currentPrice.HasValue)
-                    {
-                        if (symbolModel.Currency == Usd)
-                            currentPrice *= await GetUSDRUBAsync();
-
-                        result.TryAdd(symbolModel.Symbol, currentPrice.Value);
-                    }
-                }
-                catch (InstrumentNotFoundException e)
-                {
-                    _logger.LogWarning("Ticker {ticker} not found", e.Message);
-                }
-                catch (RpcException e)
-                {
-                    if (e.StatusCode == StatusCode.Unauthenticated)
-                    {
-                        _logger.LogError("Tinkoff token is irrelevant");
-                    }
-                    if (e.StatusCode == StatusCode.NotFound)
-                    {
-                        _logger.LogWarning("Ticker {ticker} not found", symbolModel.Symbol);
-                    }
-                }
-            }
-
+            var result = ToDictionary(tickerInfos, res);
             FillDefaultValues(tickerInfos, result);
 
             return result;
+        }
+
+        private async Task<(string, decimal)?> AwaitAndGetPriceAsync(Task<SymbolModel?> y)
+        {
+            var symbolModel = await y;
+            if (symbolModel != null)
+                return await GetPriceAsync(symbolModel);
+
+            return null;
+        }
+
+        private static Dictionary<string, decimal> ToDictionary(IEnumerable<TickerInfoBase> tickerInfos, (string, decimal)?[] res)
+        {
+            var result = new Dictionary<string, decimal>(tickerInfos.Count());
+            if (res != null)
+            {
+                foreach (var r in res.Where(x => x.HasValue))
+                {
+                    result.TryAdd(r.Value.Item1, r.Value.Item2);
+                }
+            }
+
+            return result;
+        }
+
+        private async Task<(string, decimal)?> GetPriceAsync(SymbolModel symbolModel)
+        {
+            try
+            {
+                var currentPrice = await GetLastPrice(symbolModel);
+
+                if (currentPrice.HasValue)
+                {
+                    if (symbolModel.Currency == Usd)
+                        currentPrice *= await GetUSDRUBAsync();
+
+                    return (symbolModel.Symbol, currentPrice.Value);
+                }
+            }
+            catch (InstrumentNotFoundException e)
+            {
+                _logger.LogWarning("Ticker {ticker} not found", e.Message);
+            }
+            catch (RpcException e)
+            {
+                if (e.StatusCode == StatusCode.Unauthenticated)
+                {
+                    _logger.LogError("Tinkoff token is irrelevant");
+                }
+                if (e.StatusCode == StatusCode.NotFound)
+                {
+                    _logger.LogWarning("Ticker {ticker} not found", symbolModel.Symbol);
+                }
+            }
+
+            return null;
         }
 
         private void FillDefaultValues(IEnumerable<TickerInfoBase> tickerInfos, Dictionary<string, decimal> result)
@@ -195,36 +277,46 @@ namespace InvestCore.TinkoffApi.Services
 
             foreach (var tickerInfo in tickerInfos)
             {
-                try
-                {
-                    var dataForPrice = await GetDataForPrice(tickerInfo.Ticker, tickerInfo.TickerType, tickerInfo.ClassCode);
-                    res.Add(new SymbolModel()
-                    {
-                        Symbol = tickerInfo.Ticker,
-                        Type = tickerInfo.TickerType,
-                        Figi = dataForPrice.Item1,
-                        Nominal = dataForPrice.Item2,
-                        Currency = dataForPrice.Item3,
-                    });
-                }
-                catch (InstrumentNotFoundException e)
-                {
-                    _logger.LogWarning("Ticker {ticker} not found", e.Message);
-                }
-                catch (RpcException e)
-                {
-                    if (e.StatusCode == StatusCode.Unauthenticated)
-                    {
-                        _logger.LogError("Tinkoff token is irrelevant");
-                    }
-                    if (e.StatusCode == StatusCode.NotFound)
-                    {
-                        _logger.LogWarning("Ticker {ticker} not found", tickerInfo.Ticker);
-                    }
-                }
+                var model = await GetDataForPrice(tickerInfo);
+                if (model != null)
+                    res.Add(model);
             }
 
             return res;
+        }
+
+        private async Task<SymbolModel?> GetDataForPrice(TickerInfoBase tickerInfo)
+        {
+            try
+            {
+                var dataForPrice = await GetDataForPrice(tickerInfo.Ticker, tickerInfo.TickerType, tickerInfo.ClassCode);
+
+                return new SymbolModel()
+                {
+                    Symbol = tickerInfo.Ticker,
+                    Type = tickerInfo.TickerType,
+                    Figi = dataForPrice.Item1,
+                    Nominal = dataForPrice.Item2,
+                    Currency = dataForPrice.Item3,
+                };
+            }
+            catch (InstrumentNotFoundException e)
+            {
+                _logger.LogWarning("Ticker {ticker} not found", e.Message);
+            }
+            catch (RpcException e)
+            {
+                if (e.StatusCode == StatusCode.Unauthenticated)
+                {
+                    _logger.LogError("Tinkoff token is irrelevant");
+                }
+                if (e.StatusCode == StatusCode.NotFound)
+                {
+                    _logger.LogWarning("Ticker {ticker} not found", tickerInfo.Ticker);
+                }
+            }
+
+            return null;
         }
 
         private async Task<(string, decimal?, string)> GetDataForPrice(string ticker, InstrumentType type, string classCode)
@@ -327,13 +419,13 @@ namespace InvestCore.TinkoffApi.Services
         private static string GetCacheKey(SymbolModel model)
             => model.Figi;
 
-        private Task<decimal?> GetCurrentOrLastPrice(SymbolModel model)
+        private Task<decimal?> GetLastPrice(SymbolModel model)
         {
             string key = GetCacheKey(model);
 
-            return _memoryCache.GetOrCreateAsync(key, GetCurrentOrLastPrice);
+            return _memoryCache.GetOrCreateAsync(key, GetLastPrice);
 
-            async Task<decimal?> GetCurrentOrLastPrice(ICacheEntry entry)
+            async Task<decimal?> GetLastPrice(ICacheEntry entry)
             {
                 entry.SetAbsoluteExpiration(cacheTime);
                 return await GetLastPriceInternal(model);

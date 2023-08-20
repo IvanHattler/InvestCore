@@ -21,9 +21,9 @@ namespace PercentCalculateConsole.Services.Implementation
             _metricStrategy = metricStrategy;
         }
 
-        public string GetResultMessage(StockPortfolioCalculationModel stockPortfolio)
+        public async Task<string> GetResultMessage(StockPortfolioCalculationModel stockPortfolio)
         {
-            var stockPortfolioPrices = _stockPortfolioService.GetStockProfilePrices(stockPortfolio);
+            var stockPortfolioPrices = await _stockPortfolioService.GetStockProfilePrices(stockPortfolio);
             _stockPortfolioService.LoadPricesToModel(stockPortfolio, stockPortfolioPrices);
 
             var sb = new StringBuilder();
@@ -62,9 +62,9 @@ namespace PercentCalculateConsole.Services.Implementation
             return sb.ToString();
         }
 
-        public string GetTestResultMessage(StockPortfolioCalculationModel stockPortfolio)
+        public async Task<string> GetTestResultMessage(StockPortfolioCalculationModel stockPortfolio)
         {
-            var stockPortfolioPrices = _stockPortfolioService.GetStockProfilePrices(stockPortfolio);
+            var stockPortfolioPrices = await _stockPortfolioService.GetStockProfilePrices(stockPortfolio);
             _stockPortfolioService.LoadPricesToModel(stockPortfolio, stockPortfolioPrices);
 
             var sb = new StringBuilder();
