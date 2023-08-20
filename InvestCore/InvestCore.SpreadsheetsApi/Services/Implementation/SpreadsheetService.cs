@@ -34,6 +34,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             var spreadsheet = await getChartsRequest.ExecuteAsync();
             var charts = spreadsheet.Sheets[0].Charts ?? Array.Empty<EmbeddedChart>();
 
+            //todo: move to first task
             //Move chart down
             var moveChartsRequests = GetMoveChartsDownRequest(charts, moveToRow + 2, sheetId);
 
@@ -41,6 +42,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             {
                 Requests = moveChartsRequests.Concat(new List<Request>
                 {
+                    //todo: move to first task
                     //Move all sheet down
                     GetMoveAllSheetDownRequest(moveToRow + 2, sheetId),
 
@@ -97,7 +99,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             var updateRequest = _sheetsService.Spreadsheets.Values.Update(valueRange, spreadsheetId, range);
             updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
 
-            await updateRequest.ExecuteAsync();
+            var updateTask = updateRequest.ExecuteAsync();
             _logger.LogInformation("Send current date value to range: {range}", range);
 
             var sheetId = 0;
@@ -110,7 +112,9 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                 }
             }, spreadsheetId);
 
-            await batchRequest.ExecuteAsync();
+            var formatTask = batchRequest.ExecuteAsync();
+
+            await Task.WhenAll(updateTask, formatTask);
             _logger.LogInformation("Current date style applied");
         }
 
@@ -119,7 +123,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             var endRow = table.Count + startRow;
             var endColumn = startColumn + table.Max(x => x.Count);
 
-            await SetTableValues(table, startRow, startColumn, sheet, spreadsheetId, endRow, endColumn);
+            var setTableValuesTask = SetTableValues(table, startRow, startColumn, sheet, spreadsheetId, endRow, endColumn);
 
             var sheetId = 0;
             var batchRequest = _sheetsService.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
@@ -141,7 +145,9 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                 }
             }, spreadsheetId);
 
-            await batchRequest.ExecuteAsync();
+            var formatTask = batchRequest.ExecuteAsync();
+
+            await Task.WhenAll(setTableValuesTask, formatTask);
             _logger.LogInformation("Percents of instruments table style applied");
         }
 
@@ -150,7 +156,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
             var endRow = table.Count + startRow;
             var endColumn = startColumn + table.Max(x => x.Count);
 
-            await SetTableValues(table, startRow, startColumn, sheet, spreadsheetId, endRow, endColumn);
+            var setTableValuesTask = SetTableValues(table, startRow, startColumn, sheet, spreadsheetId, endRow, endColumn);
 
             var sheetId = 0;
             var conditionalRequest = GetPortfolioResultConditionalFormatRequest(endRow - 2, endColumn - 1, endRow, endColumn, sheetId);
@@ -172,7 +178,9 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                 .ToList()
             }, spreadsheetId);
 
-            await batchRequest.ExecuteAsync();
+            var formatTask = batchRequest.ExecuteAsync();
+
+            await Task.WhenAll(setTableValuesTask, formatTask);
             _logger.LogInformation("Dictionary table style applied");
         }
 

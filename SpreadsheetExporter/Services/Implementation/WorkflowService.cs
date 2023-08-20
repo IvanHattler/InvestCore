@@ -28,31 +28,34 @@ namespace SpreadsheetExporter.Services.Implementation
         {
             var startRow = 4;
             var startColumn = 1;
+            var prices = await _shareService.GetCurrentOrLastPricesAsync(tickerInfos).ConfigureAwait(false);
+            var mainTableData = GetMainTable(tickerInfos, startColumn + 1, startRow + 1, prices);
+            var minRowsCount = 22;
 
-            var prices = await _shareService.GetCurrentOrLastPricesAsync(tickerInfos);
-            var mainTableData = GetMainTableAsync(tickerInfos, startColumn + 1, startRow + 1, prices);
+            var sendMainTableTask = _spreadsheetService.SendMainTableAsync(mainTableData, startRow, startColumn, spreadsheetConfig.Sheet,
+                spreadsheetConfig.SpreadsheetId, minRowsCount).ConfigureAwait(false);
 
             var endColumn = startColumn + mainTableData.Max(x => x.Count) + 1;
+            var dictionaryTable = GetDictionaryTable(tickerInfos, endColumn, startRow, prices, replenishment.CurrentSum, portfolioInvestment);
             var percentOfInstrumentsTable = GetPercentOfInstrumentsTable(tickerInfos, prices);
-
-            var minRowsCount = 22;
             var moveToRow = Math.Max(
                 mainTableData.Count + startRow - percentOfInstrumentsTable.Count,
                 minRowsCount + startRow - percentOfInstrumentsTable.Count);
-            var dictionaryTable = GetDictionaryTable(tickerInfos, endColumn, startRow, prices, replenishment.CurrentSum, portfolioInvestment);
 
-            await _spreadsheetService.SendMainTableAsync(mainTableData, startRow, startColumn, spreadsheetConfig.Sheet,
-                spreadsheetConfig.SpreadsheetId, minRowsCount);
+            await sendMainTableTask;
 
-            await _spreadsheetService.SendCurrentDate(DateTimeHelper.GetUTCPlus4DateTime(), 3, 1, spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
-            await _spreadsheetService.SendPercentsOfInsrumentsTable(percentOfInstrumentsTable, moveToRow, endColumn,
+            var sendCurrentDateTask = _spreadsheetService.SendCurrentDate(DateTimeHelper.GetUTCPlus4DateTime(), 3, 1, spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
+
+            var sendDictionaryTableTask = _spreadsheetService.SendDictionaryTable(dictionaryTable, startRow, endColumn,
                 spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
 
-            await _spreadsheetService.SendDictionaryTable(dictionaryTable, startRow, endColumn,
+            var sendPercentsOfInsrumentsTableTask = _spreadsheetService.SendPercentsOfInsrumentsTable(percentOfInstrumentsTable, moveToRow, endColumn,
                 spreadsheetConfig.Sheet, spreadsheetConfig.SpreadsheetId);
+
+            await Task.WhenAll(sendCurrentDateTask, sendPercentsOfInsrumentsTableTask, sendDictionaryTableTask).ConfigureAwait(false);
         }
 
-        protected List<IList<object>> GetMainTableAsync(TickerInfo[] tickerInfos,
+        protected List<IList<object>> GetMainTable(TickerInfo[] tickerInfos,
             int firstColumnIndex, int firstRowIndex, Dictionary<string, decimal> prices)
         {
             var result = new List<IList<object>>(tickerInfos.Length + 3)

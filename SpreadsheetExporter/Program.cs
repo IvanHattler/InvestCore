@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using Autofac;
 using InvestCore.Domain.Helpers;
 using InvestCore.Domain.Models;
@@ -8,37 +9,51 @@ using PercentCalculateConsole.IoC;
 using SpreadsheetExporter.Domain;
 using SpreadsheetExporter.Services.Interfaces;
 
-CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("ru-RU");
-CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("ru-RU");
-var configuration = AppRegistry.BuildConfig();
-
-var tinkoffToken = configuration.GetRequiredSection("TinkoffToken").Get<string>()
-    ?? string.Empty;
-var spreadsheetConfig = configuration.GetRequiredSection("SpreadsheetConfig").Get<SpreadsheetConfig>()
-    ?? new SpreadsheetConfig();
-var tickerInfos = configuration.GetRequiredSection("TickerInfos").Get<TickerInfo[]>()
-    ?? Array.Empty<TickerInfo>();
-var replenisment = configuration.GetRequiredSection("Replenishment").Get<ReplenishmentModel>()
-    ?? new ReplenishmentModel();
-var portfolioInvestment = configuration.GetRequiredSection("PortfolioInvestment").Get<PortfolioInvestmentModel>()
-    ?? new PortfolioInvestmentModel();
-
-var container = AppRegistry.BuildContainer(tinkoffToken, EnvironmentHelper.IsDebug ? LogLevel.Trace : LogLevel.Warning, spreadsheetConfig);
-var logger = container.Resolve<ILogger>();
-
-try
+internal class Program
 {
-    logger.LogInformation("Start processing: {datetime}", DateTimeHelper.GetUTCPlus4DateTime());
+    private static async Task Main(string[] _)
+    {
+        CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("ru-RU");
+        CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("ru-RU");
+        var configuration = AppRegistry.BuildConfig();
 
-    var workflowService = container.Resolve<IWorkflowService>();
+        var tinkoffToken = configuration.GetRequiredSection("TinkoffToken").Get<string>()
+            ?? string.Empty;
+        var spreadsheetConfig = configuration.GetRequiredSection("SpreadsheetConfig").Get<SpreadsheetConfig>()
+            ?? new SpreadsheetConfig();
+        var tickerInfos = configuration.GetRequiredSection("TickerInfos").Get<TickerInfo[]>()
+            ?? Array.Empty<TickerInfo>();
+        var replenisment = configuration.GetRequiredSection("Replenishment").Get<ReplenishmentModel>()
+            ?? new ReplenishmentModel();
+        var portfolioInvestment = configuration.GetRequiredSection("PortfolioInvestment").Get<PortfolioInvestmentModel>()
+            ?? new PortfolioInvestmentModel();
 
-    workflowService
-        .UpdateTableAsync(tickerInfos, spreadsheetConfig, replenisment, portfolioInvestment)
-        .Wait();
+        var container = AppRegistry.BuildContainer(tinkoffToken, EnvironmentHelper.IsDebug ? LogLevel.Trace : LogLevel.Warning, spreadsheetConfig);
+        var logger = container.Resolve<ILogger>();
 
-    logger.LogInformation("End processing: {datetime}", DateTimeHelper.GetUTCPlus4DateTime());
-}
-catch (Exception e)
-{
-    logger.LogError(e, "An exception occured");
+        try
+        {
+            logger.LogInformation("Start processing: {datetime}", DateTimeHelper.GetUTCPlus4DateTime());
+
+            var workflowService = container.Resolve<IWorkflowService>();
+
+#if DEBUG
+            var sw = Stopwatch.StartNew();
+#endif
+
+            await workflowService
+                .UpdateTableAsync(tickerInfos, spreadsheetConfig, replenisment, portfolioInvestment);
+
+#if DEBUG
+            sw.Stop();
+            Console.WriteLine(sw.ElapsedMilliseconds);
+#endif
+
+            logger.LogInformation("End processing: {datetime}", DateTimeHelper.GetUTCPlus4DateTime());
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "An exception occured");
+        }
+    }
 }

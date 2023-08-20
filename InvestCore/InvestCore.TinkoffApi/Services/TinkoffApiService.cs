@@ -138,47 +138,6 @@ namespace InvestCore.TinkoffApi.Services
             return result;
         }
 
-        //public async Task<Dictionary<string, decimal>> GetCurrentOrLastPricesAsync(IEnumerable<TickerInfoBase> tickerInfos)
-        //{
-        //    var result = new Dictionary<string, decimal>(tickerInfos.Count());
-        //    var symbolModels = await GetSymbolModels(tickerInfos);
-
-        //    foreach (var symbolModel in symbolModels.Where(x => x != null))
-        //    {
-        //        try
-        //        {
-        //            var currentPrice = await GetLastPrice(symbolModel);
-
-        //            if (currentPrice.HasValue)
-        //            {
-        //                if (symbolModel.Currency == Usd)
-        //                    currentPrice *= await GetUSDRUBAsync();
-
-        //                result.TryAdd(symbolModel.Symbol, currentPrice.Value);
-        //            }
-        //        }
-        //        catch (InstrumentNotFoundException e)
-        //        {
-        //            _logger.LogWarning("Ticker {ticker} not found", e.Message);
-        //        }
-        //        catch (RpcException e)
-        //        {
-        //            if (e.StatusCode == StatusCode.Unauthenticated)
-        //            {
-        //                _logger.LogError("Tinkoff token is irrelevant");
-        //            }
-        //            if (e.StatusCode == StatusCode.NotFound)
-        //            {
-        //                _logger.LogWarning("Ticker {ticker} not found", symbolModel.Symbol);
-        //            }
-        //        }
-        //    }
-
-        //    FillDefaultValues(tickerInfos, result);
-
-        //    return result;
-        //}
-
         public async Task<Dictionary<string, decimal>> GetCurrentOrLastPricesAsync(IEnumerable<TickerInfoBase> tickerInfos)
         {
             var tasks = tickerInfos
@@ -188,24 +147,24 @@ namespace InvestCore.TinkoffApi.Services
 
             var res = await Task.WhenAll(tasks);
 
-            var result = ToDictionary(tickerInfos, res);
+            var result = ToDictionary(res);
             FillDefaultValues(tickerInfos, result);
 
             return result;
         }
 
-        private async Task<(string, decimal)?> AwaitAndGetPriceAsync(Task<SymbolModel?> y)
+        private async Task<(string, decimal)?> AwaitAndGetPriceAsync(Task<SymbolModel?> task)
         {
-            var symbolModel = await y;
+            var symbolModel = await task.ConfigureAwait(false);
             if (symbolModel != null)
-                return await GetPriceAsync(symbolModel);
+                return await GetPriceAsync(symbolModel).ConfigureAwait(false);
 
             return null;
         }
 
-        private static Dictionary<string, decimal> ToDictionary(IEnumerable<TickerInfoBase> tickerInfos, (string, decimal)?[] res)
+        private static Dictionary<string, decimal> ToDictionary((string, decimal)?[] res)
         {
-            var result = new Dictionary<string, decimal>(tickerInfos.Count());
+            var result = new Dictionary<string, decimal>(res.Length);
             if (res != null)
             {
                 foreach (var r in res.Where(x => x.HasValue))
@@ -221,12 +180,12 @@ namespace InvestCore.TinkoffApi.Services
         {
             try
             {
-                var currentPrice = await GetLastPrice(symbolModel);
+                var currentPrice = await GetLastPrice(symbolModel).ConfigureAwait(false);
 
                 if (currentPrice.HasValue)
                 {
                     if (symbolModel.Currency == Usd)
-                        currentPrice *= await GetUSDRUBAsync();
+                        currentPrice *= await GetUSDRUBAsync().ConfigureAwait(false);
 
                     return (symbolModel.Symbol, currentPrice.Value);
                 }
@@ -271,25 +230,11 @@ namespace InvestCore.TinkoffApi.Services
             }
         }
 
-        private async Task<IEnumerable<SymbolModel>> GetSymbolModels(IEnumerable<TickerInfoBase> tickerInfos)
-        {
-            var res = new List<SymbolModel>();
-
-            foreach (var tickerInfo in tickerInfos)
-            {
-                var model = await GetDataForPrice(tickerInfo);
-                if (model != null)
-                    res.Add(model);
-            }
-
-            return res;
-        }
-
         private async Task<SymbolModel?> GetDataForPrice(TickerInfoBase tickerInfo)
         {
             try
             {
-                var dataForPrice = await GetDataForPrice(tickerInfo.Ticker, tickerInfo.TickerType, tickerInfo.ClassCode);
+                var dataForPrice = await GetDataForPrice(tickerInfo.Ticker, tickerInfo.TickerType, tickerInfo.ClassCode).ConfigureAwait(false);
 
                 return new SymbolModel()
                 {
