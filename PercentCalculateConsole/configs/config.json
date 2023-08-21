@@ -17,8 +17,9 @@
     "CorpBond": {
       "ClassType": 2,
       "TargetPercent": 0.05,
-      "Ticker": "SBRB",
+      "Ticker": "BOND",
       "TickerType": 2,
+      "DefaultPrice": 1124,
       "ClassCode": "TQTF"
     },
     "Gold": {
