@@ -1,4 +1,4 @@
-﻿using Google.Protobuf.WellKnownTypes;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using InvestCore.Domain.Models;
 using InvestCore.Domain.Services.Interfaces;
@@ -18,11 +18,11 @@ namespace InvestCore.TinkoffApi.Services
         private readonly ILogger _logger;
         private readonly IMemoryCache _memoryCache;
         private const string Usd = "usd";
-        private decimal? USDRUB;
-        private IEnumerable<Share> Shares;
-        private IEnumerable<Bond> Bonds;
-        private IEnumerable<Etf> Etfs;
-        private readonly TimeSpan cacheTime = TimeSpan.FromMinutes(5);
+        private decimal? _usdrub;
+        private IEnumerable<Share> _shares;
+        private IEnumerable<Bond> _bonds;
+        private IEnumerable<Etf> _etfs;
+        private readonly TimeSpan _cacheTime = TimeSpan.FromMinutes(5);
 
         public TinkoffApiService(InvestApiClient investApiClient, ILogger logger, IMemoryCache memoryCache)
         {
@@ -44,12 +44,12 @@ namespace InvestCore.TinkoffApi.Services
 
         public async Task<decimal?> GetUSDRUBAsync()
         {
-            if (USDRUB == null)
+            if (_usdrub == null)
             {
                 try
                 {
                     //BBG0013HGFT4 USD000UTSTOM
-                    USDRUB = await GetByCandles("BBG0013HGFT4").ConfigureAwait(false)
+                    _usdrub = await GetByCandles("BBG0013HGFT4").ConfigureAwait(false)
                         ?? await GetClosePrice("BBG0013HGFT4").ConfigureAwait(false);
                 }
                 finally
@@ -57,55 +57,55 @@ namespace InvestCore.TinkoffApi.Services
                     LogRequestCompleted();
                 }
             }
-            return USDRUB;
+            return _usdrub;
         }
 
         protected async Task<IEnumerable<Share>> GetSharesAsync()
         {
-            if (Shares == null)
+            if (_shares == null)
             {
                 try
                 {
-                    Shares = (await _investApiClient.Instruments.SharesAsync().ConfigureAwait(false)).Instruments;
+                    _shares = (await _investApiClient.Instruments.SharesAsync().ConfigureAwait(false)).Instruments;
                 }
                 finally
                 {
                     LogRequestCompleted();
                 }
             }
-            return Shares;
+            return _shares;
         }
 
         protected async Task<IEnumerable<Bond>> GetBondsAsync()
         {
-            if (Bonds == null)
+            if (_bonds == null)
             {
                 try
                 {
-                    Bonds = (await _investApiClient.Instruments.BondsAsync().ConfigureAwait(false)).Instruments;
+                    _bonds = (await _investApiClient.Instruments.BondsAsync().ConfigureAwait(false)).Instruments;
                 }
                 finally
                 {
                     LogRequestCompleted();
                 }
             }
-            return Bonds;
+            return _bonds;
         }
 
         protected async Task<IEnumerable<Etf>> GetEtfsAsync()
         {
-            if (Etfs == null)
+            if (_etfs == null)
             {
                 try
                 {
-                    Etfs = (await _investApiClient.Instruments.EtfsAsync().ConfigureAwait(false)).Instruments;
+                    _etfs = (await _investApiClient.Instruments.EtfsAsync().ConfigureAwait(false)).Instruments;
                 }
                 finally
                 {
                     LogRequestCompleted();
                 }
             }
-            return Etfs;
+            return _etfs;
         }
 
         [Obsolete($"Использовать GetCurrentOrLastPricesAsync")]
@@ -374,7 +374,7 @@ namespace InvestCore.TinkoffApi.Services
 
             async Task<decimal?> GetCurrentOrLastPrice(ICacheEntry entry)
             {
-                entry.SetAbsoluteExpiration(cacheTime);
+                entry.SetAbsoluteExpiration(_cacheTime);
                 return await GetCurrentOrLastPriceInternal(model);
             }
         }
