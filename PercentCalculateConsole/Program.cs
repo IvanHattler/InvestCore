@@ -7,7 +7,7 @@ using PercentCalculateConsole.Services.Interfaces;
 
 internal class Program
 {
-    private static async Task Main(string[] args)
+    private static async Task Main(string[] _)
     {
         var configuration = AppRegistry.BuildConfig();
         var telegramToken = configuration.GetRequiredSection("TinkoffToken").Get<string>()
@@ -22,9 +22,8 @@ internal class Program
 
         var container = AppRegistry.BuildContainer(telegramToken);
 
-
         var messageService = container.Resolve<IMessageService>();
-        Console.WriteLine(messageService.GetResultMessage(stockPortfolio));
+        Console.WriteLine(await messageService.GetResultMessage(stockPortfolio));
         Console.ReadLine();
     }
 }

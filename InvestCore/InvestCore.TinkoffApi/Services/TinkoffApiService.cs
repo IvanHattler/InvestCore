@@ -22,7 +22,7 @@ namespace InvestCore.TinkoffApi.Services
         private IEnumerable<Share> Shares;
         private IEnumerable<Bond> Bonds;
         private IEnumerable<Etf> Etfs;
-        private TimeSpan cacheTime = TimeSpan.FromMinutes(5);
+        private readonly TimeSpan cacheTime = TimeSpan.FromMinutes(5);
 
         public TinkoffApiService(InvestApiClient investApiClient, ILogger logger, IMemoryCache memoryCache)
         {
