@@ -13,6 +13,8 @@ internal class Program
 {
     private static async Task Main(string[] _)
     {
+        var stopwatch = Stopwatch.StartNew();
+
         CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("ru-RU");
         CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("ru-RU");
         var configuration = AppRegistry.BuildConfig();
@@ -37,23 +39,19 @@ internal class Program
 
             var workflowService = container.Resolve<IWorkflowService>();
 
-#if DEBUG
-            var sw = Stopwatch.StartNew();
-#endif
-
             await workflowService
                 .UpdateTableAsync(tickerInfos, spreadsheetConfig, replenisment, portfolioInvestment);
-
-#if DEBUG
-            sw.Stop();
-            Console.WriteLine(sw.ElapsedMilliseconds);
-#endif
 
             logger.LogInformation("End processing: {datetime}", DateTimeHelper.GetUTCPlus4DateTime());
         }
         catch (Exception e)
         {
             logger.LogError(e, "An exception occured");
+        }
+        finally
+        {
+            stopwatch.Stop();
+            logger.LogWarning("Processing ended by {elapsed}", stopwatch.Elapsed);
         }
     }
 }

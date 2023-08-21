@@ -164,13 +164,14 @@ namespace InvestCore.TinkoffApi.Services
 
         private static Dictionary<string, decimal> ToDictionary((string, decimal)?[] res)
         {
+            if (res == null)
+                return new Dictionary<string, decimal>(0);
+
             var result = new Dictionary<string, decimal>(res.Length);
-            if (res != null)
+
+            foreach (var r in res.Where(x => x.HasValue))
             {
-                foreach (var r in res.Where(x => x.HasValue))
-                {
-                    result.TryAdd(r.Value.Item1, r.Value.Item2);
-                }
+                result.TryAdd(r.Value.Item1, r.Value.Item2);
             }
 
             return result;
