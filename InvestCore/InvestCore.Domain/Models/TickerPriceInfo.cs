@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace InvestCore.Domain.Models
+﻿namespace InvestCore.Domain.Models
 {
     public class TickerPriceInfo : TickerInfoWithCount
     {

@@ -24,7 +24,6 @@ namespace ChatBotWorker.IoC
                 .Build();
         }
 
-
         public static void BuildContainer(ContainerBuilder builder)
         {
             var logFilePath = Path.Combine(FileHelper.DirectoryPath, "log.txt");

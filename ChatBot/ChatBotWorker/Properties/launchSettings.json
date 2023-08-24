@@ -1,11 +1,11 @@
 ﻿{
-  "profiles": {
-    "ChatBotWorker": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
-      }
+    "profiles": {
+        "ChatBotWorker": {
+            "commandName": "Project",
+            "dotnetRunMessages": true,
+            "environmentVariables": {
+                "DOTNET_ENVIRONMENT": "Development"
+            }
+        }
     }
-  }
 }

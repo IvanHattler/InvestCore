@@ -1,5 +1,4 @@
-﻿using Tinkoff.InvestApi.V1;
-using InstrumentType = InvestCore.Domain.Models.InstrumentType;
+﻿using InstrumentType = InvestCore.Domain.Models.InstrumentType;
 
 namespace InvestCore.TinkoffApi.Domain
 {

@@ -1,35 +1,35 @@
 {
-  "StockPortfolioCalculationModel": {
-    "Share": {
-      "ClassType": 0,
-      "TargetPercent": 0.75,
-      "Ticker": "SBMX",
-      "TickerType": 2,
-      "ClassCode": "TQTF"
-    },
-    "GosBond": {
-      "ClassType": 1,
-      "TargetPercent": 0.15,
-      "Ticker": "SBGB",
-      "TickerType": 2,
-      "ClassCode": "TQTF"
-    },
-    "CorpBond": {
-      "ClassType": 2,
-      "TargetPercent": 0.05,
-      "Ticker": "BOND",
-      "TickerType": 2,
-      "DefaultPrice": 1124,
-      "ClassCode": "TQTF"
-    },
-    "Gold": {
-      "ClassType": 3,
-      "TargetPercent": 0.05,
-      "Ticker": "SBGD",
-      "TickerType": 2,
-      "ClassCode": "TQTF"
-    },
+    "StockPortfolioCalculationModel": {
+        "Share": {
+            "ClassType": 0,
+            "TargetPercent": 0.75,
+            "Ticker": "SBMX",
+            "TickerType": 2,
+            "ClassCode": "TQTF"
+        },
+        "GosBond": {
+            "ClassType": 1,
+            "TargetPercent": 0.15,
+            "Ticker": "SBGB",
+            "TickerType": 2,
+            "ClassCode": "TQTF"
+        },
+        "CorpBond": {
+            "ClassType": 2,
+            "TargetPercent": 0.05,
+            "Ticker": "BOND",
+            "TickerType": 2,
+            "DefaultPrice": 1124,
+            "ClassCode": "TQTF"
+        },
+        "Gold": {
+            "ClassType": 3,
+            "TargetPercent": 0.05,
+            "Ticker": "SBGD",
+            "TickerType": 2,
+            "ClassCode": "TQTF"
+        },
 
-    "MonthCountForCalculate": 3
-  }
+        "MonthCountForCalculate": 3
+    }
 }

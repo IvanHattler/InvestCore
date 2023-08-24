@@ -26,7 +26,6 @@ namespace ChatBot.IoC
                 .Build();
         }
 
-
         public static IContainer BuildContainer(string twelveDataApiToken, string telegramToken, long[] availableIds, double messageInterval, bool needSendMessagesOnStart,
             string tinkoffToken)
         {

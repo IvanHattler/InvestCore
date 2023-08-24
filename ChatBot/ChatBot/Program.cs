@@ -3,7 +3,6 @@ using ChatBot.Core.Services.Interfaces;
 using ChatBot.IoC;
 using Microsoft.Extensions.Configuration;
 
-
 var configuration = AppRegistry.BuildConfig();
 var telegramToken = configuration.GetRequiredSection("TelegramToken").Get<string>();
 var twelveDataApiToken = configuration.GetRequiredSection("TwelveDataApiToken").Get<string>();
@@ -13,7 +12,6 @@ var needSendMessagesOnStart = configuration.GetRequiredSection("NeedSendMessages
 var tinkoffToken = configuration.GetRequiredSection("TinkoffToken").Get<string>();
 
 var container = AppRegistry.BuildContainer(twelveDataApiToken, telegramToken, availableIds, messageInterval, needSendMessagesOnStart, tinkoffToken);
-
 
 var initService = container.Resolve<IInitService>();
 await initService.Init();

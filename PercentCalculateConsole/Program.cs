@@ -1,4 +1,4 @@
-﻿using Autofac;
+using Autofac;
 using InvestCore.Domain.Models;
 using InvestCore.PercentCalculateConsole.Domain;
 using Microsoft.Extensions.Configuration;

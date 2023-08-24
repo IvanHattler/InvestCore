@@ -1,5 +1,4 @@
-﻿using System;
-using Google.Apis.Sheets.v4;
+﻿using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using InvestCore.SpreadsheetsApi.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -185,6 +184,7 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
         }
 
         #region Private methods
+
         private static Request[] GetPortfolioResultConditionalFormatRequest(int startRow, int startColumn, int endRow, int endColumn, int sheetId)
         {
             List<GridRange> gridRanges = new List<GridRange>()
@@ -265,7 +265,6 @@ namespace InvestCore.SpreadsheetsApi.Services.Implementation
                 },
             };
         }
-
 
         private static IEnumerable<Request> GetMoveChartsDownRequest(IList<EmbeddedChart> charts, int rowCount, int sheetId)
         {
