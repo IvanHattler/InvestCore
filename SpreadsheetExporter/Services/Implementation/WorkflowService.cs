@@ -30,7 +30,7 @@ namespace SpreadsheetExporter.Services.Implementation
             var startColumn = 1;
             var prices = await _shareService.GetCurrentOrLastPricesAsync(tickerInfos).ConfigureAwait(false);
             var mainTableData = GetMainTable(tickerInfos, startColumn + 1, startRow + 1, prices);
-            var minRowsCount = 22;
+            var minRowsCount = 34;
 
             var sendMainTableTask = _spreadsheetService.SendMainTableAsync(mainTableData, startRow, startColumn, spreadsheetConfig.Sheet,
                 spreadsheetConfig.SpreadsheetId, minRowsCount).ConfigureAwait(false);
